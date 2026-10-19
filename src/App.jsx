@@ -160,8 +160,6 @@ function detectCity(position) {
   return matches[0]?.city ?? null;
 }
 
-// Villa Mercedes: el turno sale del calendario (día -> grupo) y del listado de
-// farmacias de cada grupo. Un grupo puede tener 2 o 3 farmacias de turno.
 function getVillaMercedesShift(date) {
   const [year, month, day] = date.split("-");
   const group =
@@ -183,9 +181,57 @@ function getVillaMercedesShift(date) {
   };
 }
 
+// San Luis Capital: 15 grupos (A-O) que rotan un grupo por día.
+// El 1 de enero de 2026 corresponde al grupo A.
+const SAN_LUIS_GROUP_CYCLE = "ABCDEFGHIJKLMNO".split("");
+
+function getSanLuisGroup(date) {
+  // 1) Calendario oficial cargado en el JSON ("YYYY-MM-DD": "grupo").
+  const listed = farmaciasSanLuisData.calendario?.[date];
+  if (listed) return listed;
+
+  // 2) Si el día no figura en el calendario, se calcula con la misma
+  //    rotación diaria que sigue el resto del calendario del año.
+  const [year, month, day] = date.split("-").map(Number);
+  if (year !== farmaciasSanLuisData.anio) return null;
+
+  const dayIndex = Math.round(
+    (Date.UTC(year, month - 1, day) - Date.UTC(year, 0, 1)) / 86400000
+  );
+  const cycleLength = SAN_LUIS_GROUP_CYCLE.length;
+
+  return SAN_LUIS_GROUP_CYCLE[
+    ((dayIndex % cycleLength) + cycleLength) % cycleLength
+  ];
+}
+
+function getSanLuisShift(date) {
+  const group = getSanLuisGroup(date);
+  if (!group) return null;
+
+  const delGrupo = farmaciasSanLuisData.grupos?.[group];
+  if (!delGrupo?.length) return null;
+
+  // Las farmacias permanentes están de turno todos los días.
+  const permanentes = farmaciasSanLuisData.permanentes ?? [];
+
+  const horarioTurno = farmaciasSanLuisData.horarioTurno;
+
+  return {
+    grupo: group,
+    farmacias: [...delGrupo, ...permanentes],
+    horario: horarioTurno ? { detalle: horarioTurno } : null
+  };
+}
+
 function getShift(cityId, date) {
   if (cityId === "villa-mercedes") {
     const groupShift = getVillaMercedesShift(date);
+    if (groupShift) return groupShift;
+  }
+
+  if (cityId === "san-luis-capital") {
+    const groupShift = getSanLuisShift(date);
     if (groupShift) return groupShift;
   }
 
@@ -206,6 +252,13 @@ function getDirectionsUrl(item, cityName) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     `${place}, ${cityName}, San Luis, Argentina`
   )}`;
+}
+
+// Algunas farmacias traen dos teléfonos ("123 / 456" o "123 - 456"):
+// el enlace de llamada usa el primero y sin espacios.
+function getPhoneHref(telefono) {
+  const first = String(telefono).split(/[\/-]/)[0].replace(/\s+/g, "");
+  return `tel:${first}`;
 }
 
 function MapRecenter({ center }) {
@@ -262,7 +315,7 @@ function CityCard({ city, selected, onClick }) {
   );
 }
 
-// Turno por grupo (Villa Mercedes): lista de farmacias de turno.
+// Turno por grupo (Villa Mercedes y San Luis Capital): lista de farmacias de turno.
 function GroupShiftCard({ shift, cityName }) {
   return (
     <div className="overflow-hidden rounded-[28px] border border-teal-200/15 bg-gradient-to-br from-teal-300/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
@@ -329,7 +382,7 @@ function GroupShiftCard({ shift, cityName }) {
 
               {item.telefono && (
                 <a
-                  href={`tel:${item.telefono}`}
+                  href={getPhoneHref(item.telefono)}
                   className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
                 >
                   <Phone size={16} />
@@ -422,9 +475,7 @@ function App() {
     [selectedCity, selectedDate]
   );
 
-  // Farmacias a ubicar en el mapa:
-  // - San Luis Capital: todas las del listado.
-  // - Villa Mercedes: solo las del grupo de turno de la fecha elegida.
+  
   const farmaciasToLocate = useMemo(() => {
     if (selectedCity === "san-luis-capital") {
       return farmaciasSanLuisData.farmacias;

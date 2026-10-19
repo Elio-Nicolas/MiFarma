@@ -4,7 +4,7 @@
   "fuente": "Documento Turnos_VM (calendario de turnos mayo-diciembre y grupos de farmacias)",
   "horarioTurno": null,
   "notaCoordenadas": "Direcciones, teléfonos y coordenadas pendientes: el PDF solo trae nombres de farmacias. No usar lat/lng hasta completar y geocodificar.",
-  "notaCalendario": "El PDF no indica el año; se asumió 2026. El ciclo es de 27 grupos (A-Z y AA) y arranca con A el 1 de mayo.",
+  "notaCalendario": "El ciclo es de 27 grupos (A-Z y AA) y arranca con A el 1 de mayo.",
   "grupos": {
     "A": [
       {
