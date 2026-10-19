@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
@@ -6,12 +5,10 @@ import {
   Marker,
   Popup,
   useMap,
-  ZoomControl 
-
+  ZoomControl
 } from "react-leaflet";
 import L from "leaflet";
 import {
-  Activity,
   ArrowDownRight,
   ArrowRight,
   Check,
@@ -24,12 +21,12 @@ import {
   Phone,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
-  Stethoscope
+  Sparkles
 } from "lucide-react";
 
 import turnosData from "./data/turnos.json";
 import farmaciasSanLuisData from "./data/farmacias-san-luis.json";
+import farmaciasVillaMercedesData from "./data/farmacias-villa-mercedes.json";
 
 const TIMEZONE = "America/Argentina/San_Luis";
 
@@ -51,6 +48,20 @@ const CITIES = [
     radiusKm: 18
   }
 ];
+
+// Configuración del geocoding por ciudad (caché propia y filtro de distancia).
+const GEOCODING_CONFIG = {
+  "san-luis-capital": {
+    cacheKey: "farmacias-sl-geocoding-v1",
+    localidad: "San Luis",
+    maxDistanceKm: 25
+  },
+  "villa-mercedes": {
+    cacheKey: "farmacias-vm-geocoding-v1",
+    localidad: "Villa Mercedes, San Luis",
+    maxDistanceKm: 15
+  }
+};
 
 const pharmacyIcon = L.divIcon({
   className: "pharmacy-marker",
@@ -149,7 +160,35 @@ function detectCity(position) {
   return matches[0]?.city ?? null;
 }
 
+// Villa Mercedes: el turno sale del calendario (día -> grupo) y del listado de
+// farmacias de cada grupo. Un grupo puede tener 2 o 3 farmacias de turno.
+function getVillaMercedesShift(date) {
+  const [year, month, day] = date.split("-");
+  const group =
+    farmaciasVillaMercedesData.calendario?.[`${year}-${month}`]?.[
+      String(Number(day))
+    ];
+
+  if (!group) return null;
+
+  const farmacias = farmaciasVillaMercedesData.grupos?.[group];
+  if (!farmacias?.length) return null;
+
+  const horarioTurno = farmaciasVillaMercedesData.horarioTurno;
+
+  return {
+    grupo: group,
+    farmacias,
+    horario: horarioTurno ? { detalle: horarioTurno } : null
+  };
+}
+
 function getShift(cityId, date) {
+  if (cityId === "villa-mercedes") {
+    const groupShift = getVillaMercedesShift(date);
+    if (groupShift) return groupShift;
+  }
+
   const city = turnosData.ciudades?.[cityId];
   const shift = city?.turnos?.[date];
 
@@ -158,6 +197,15 @@ function getShift(cityId, date) {
   }
 
   return shift;
+}
+
+// Si la farmacia no tiene dirección cargada se busca por nombre.
+function getDirectionsUrl(item, cityName) {
+  const place = item.direccion || `Farmacia ${item.nombre}`;
+
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    `${place}, ${cityName}, San Luis, Argentina`
+  )}`;
 }
 
 function MapRecenter({ center }) {
@@ -172,7 +220,6 @@ function MapRecenter({ center }) {
 
   return null;
 }
-
 
 function CityCard({ city, selected, onClick }) {
   return (
@@ -212,6 +259,88 @@ function CityCard({ city, selected, onClick }) {
         </p>
       </div>
     </button>
+  );
+}
+
+// Turno por grupo (Villa Mercedes): lista de farmacias de turno.
+function GroupShiftCard({ shift, cityName }) {
+  return (
+    <div className="overflow-hidden rounded-[28px] border border-teal-200/15 bg-gradient-to-br from-teal-300/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
+      <div className="flex items-start gap-4">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-teal-300 text-slate-950">
+          <Cross size={30} strokeWidth={2.5} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-200">
+            <ShieldCheck size={12} />
+            Turno cargado
+          </span>
+
+          <h3 className="mt-3 text-xl font-semibold text-white sm:text-2xl">
+            Grupo de turno {shift.grupo}
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            {shift.farmacias.length}{" "}
+            {shift.farmacias.length === 1
+              ? "farmacia de turno"
+              : "farmacias de turno"}
+          </p>
+        </div>
+      </div>
+
+      {shift.horario?.detalle && (
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-white/[0.07] bg-black/10 p-3.5">
+          <Clock3 size={18} className="mt-0.5 shrink-0 text-teal-200" />
+          <div>
+            <p className="text-sm font-medium text-white">Horario del turno</p>
+            <p className="mt-1 text-sm text-slate-400">
+              {shift.horario.detalle}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <ul className="mt-5 space-y-3">
+        {shift.farmacias.map((item) => (
+          <li
+            key={item.id}
+            className="rounded-2xl border border-white/[0.07] bg-black/10 p-4"
+          >
+            <p className="font-semibold text-white">{item.nombre}</p>
+
+            {item.direccion && (
+              <p className="mt-1.5 flex items-start gap-2 text-sm leading-6 text-slate-300">
+                <MapPin size={15} className="mt-1 shrink-0 text-teal-200" />
+                {item.direccion}
+              </p>
+            )}
+
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <a
+                href={getDirectionsUrl(item, cityName)}
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
+              >
+                <Navigation size={16} />
+                Cómo llegar
+              </a>
+
+              {item.telefono && (
+                <a
+                  href={`tel:${item.telefono}`}
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                >
+                  <Phone size={16} />
+                  Llamar
+                </a>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -286,8 +415,30 @@ function App() {
     );
   }, [retryCount]);
 
+  const city = CITIES.find((item) => item.id === selectedCity) ?? null;
+
+  const shift = useMemo(
+    () => (selectedCity ? getShift(selectedCity, selectedDate) : null),
+    [selectedCity, selectedDate]
+  );
+
+  // Farmacias a ubicar en el mapa:
+  // - San Luis Capital: todas las del listado.
+  // - Villa Mercedes: solo las del grupo de turno de la fecha elegida.
+  const farmaciasToLocate = useMemo(() => {
+    if (selectedCity === "san-luis-capital") {
+      return farmaciasSanLuisData.farmacias;
+    }
+    if (selectedCity === "villa-mercedes") {
+      return shift?.farmacias ?? [];
+    }
+    return [];
+  }, [selectedCity, shift]);
+
   useEffect(() => {
-    if (selectedCity !== "san-luis-capital") {
+    const config = GEOCODING_CONFIG[selectedCity];
+
+    if (!config || farmaciasToLocate.length === 0) {
       setMappedPharmacies([]);
       setGeocodingStatus("idle");
       return;
@@ -299,17 +450,16 @@ function App() {
 
     async function locatePharmacies() {
       setGeocodingStatus("loading");
-      const cacheKey = "farmacias-sl-geocoding-v1";
       let cache = {};
 
       try {
-        cache = JSON.parse(localStorage.getItem(cacheKey) || "{}");
+        cache = JSON.parse(localStorage.getItem(config.cacheKey) || "{}");
       } catch {
         cache = {};
       }
 
-      const cityCenter = CITIES.find((item) => item.id === "san-luis-capital");
-      const source = farmaciasSanLuisData.farmacias;
+      const cityCenter = CITIES.find((item) => item.id === selectedCity);
+      const source = farmaciasToLocate;
       const located = [];
       const pending = source.filter((item) => !cache[item.id]);
 
@@ -326,7 +476,15 @@ function App() {
         if (cancelled) return;
         const batch = pending.slice(start, start + 3);
         const results = await Promise.all(batch.map(async (item) => {
-          const query = `${item.nombre}, ${item.direccion}, San Luis, Argentina`;
+          // Sin dirección cargada se busca por nombre ("Farmacia X").
+          const query = [
+            item.direccion ? item.nombre : `Farmacia ${item.nombre}`,
+            item.direccion,
+            config.localidad,
+            "Argentina"
+          ]
+            .filter(Boolean)
+            .join(", ");
           try {
             const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1&lat=${cityCenter.lat}&lon=${cityCenter.lng}`;
             const response = await fetch(url);
@@ -335,7 +493,7 @@ function App() {
             const coordinates = result.features?.[0]?.geometry?.coordinates;
             if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
             const candidate = { lng: coordinates[0], lat: coordinates[1] };
-            if (distanceKm(candidate, cityCenter) > 25) return null;
+            if (distanceKm(candidate, cityCenter) > config.maxDistanceKm) return null;
             return { ...item, ...candidate };
           } catch {
             return null;
@@ -350,7 +508,7 @@ function App() {
         }
         setMappedPharmacies([...located]);
         try {
-          localStorage.setItem(cacheKey, JSON.stringify(cache));
+          localStorage.setItem(config.cacheKey, JSON.stringify(cache));
         } catch {
           // La app sigue funcionando aunque el navegador no permita guardar caché.
         }
@@ -364,36 +522,34 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [selectedCity]);
-
-  const city = CITIES.find((item) => item.id === selectedCity) ?? null;
-
-  const shift = useMemo(
-    () => (selectedCity ? getShift(selectedCity, selectedDate) : null),
-    [selectedCity, selectedDate]
-  );
+  }, [selectedCity, farmaciasToLocate]);
 
   const pharmacy = shift?.farmacia;
+  const pharmacyLat = pharmacy?.lat;
+  const pharmacyLng = pharmacy?.lng;
   const hasPharmacyCoordinates =
-    Number.isFinite(pharmacy?.lat) && Number.isFinite(pharmacy?.lng);
+    Number.isFinite(pharmacyLat) && Number.isFinite(pharmacyLng);
 
-  const mapCenter = hasPharmacyCoordinates
-    ? [pharmacy.lat, pharmacy.lng]
-    : city
-      ? [city.lat, city.lng]
-      : [-33.6757, -65.4578];
+  // useMemo evita que el mapa se recentre en cada render (por ejemplo al
+  // llegar cada lote de farmacias geolocalizadas).
+  const mapCenter = useMemo(() => {
+    if (hasPharmacyCoordinates) return [pharmacyLat, pharmacyLng];
+    if (city) return [city.lat, city.lng];
+    return [-33.6757, -65.4578];
+  }, [hasPharmacyCoordinates, pharmacyLat, pharmacyLng, city]);
 
   const googleMapsUrl = hasPharmacyCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${pharmacy.lat},${pharmacy.lng}${
+    ? `https://www.google.com/maps/dir/?api=1&destination=${pharmacyLat},${pharmacyLng}${
         userPosition
           ? `&origin=${userPosition.lat},${userPosition.lng}`
           : ""
       }`
     : pharmacy?.direccion
-      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-          `${pharmacy.direccion}, ${city?.name}, San Luis, Argentina`
-        )}`
+      ? getDirectionsUrl(pharmacy, city?.name)
       : null;
+
+  const locatedLabel =
+    selectedCity === "villa-mercedes" ? "farmacias de turno" : "farmacias";
 
   function chooseCity(cityId) {
     manualSelectionRef.current = true;
@@ -594,7 +750,9 @@ function App() {
               </div>
             </div>
 
-            {shift ? (
+            {shift?.farmacias ? (
+              <GroupShiftCard shift={shift} cityName={city.name} />
+            ) : shift ? (
               <div className="overflow-hidden rounded-[28px] border border-teal-200/15 bg-gradient-to-br from-teal-300/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-teal-300 text-slate-950">
@@ -712,19 +870,19 @@ function App() {
             </div>
 
             <div className="relative h-[310px] overflow-hidden rounded-[28px] border border-white/[0.09] bg-[#111c2c] sm:h-[380px]">
-             
-             <a
+
+              <a
                 href="https://iored.com.ar/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute bottom-4 right-4 z-[1000] flex items-center gap-2 rounded-full border border-teal-500/30 bg-slate-950/80 px-3 py-1.5 text-xs font-medium text-teal-200 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-teal-400 hover:bg-slate-950 shadow-lg"
-             >
-             <span className="relative flex h-2 w-2">
-             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
-             <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-400"></span>
-             </span>
-               Desarrollado por <span className="font-semibold text-white">IO Red</span>
-             </a>
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-400"></span>
+                </span>
+                Desarrollado por <span className="font-semibold text-white">IO Red</span>
+              </a>
 
               <MapContainer
                 center={mapCenter}
@@ -751,14 +909,18 @@ function App() {
                     <Popup>
                       <strong>{mappedPharmacy.nombre}</strong>
                       <br />
-                      {mappedPharmacy.direccion}
-                      <br />
+                      {mappedPharmacy.direccion && (
+                        <>
+                          {mappedPharmacy.direccion}
+                          <br />
+                        </>
+                      )}
                       {mappedPharmacy.permanente
                         ? "Turno permanente"
                         : `Grupo de turno ${mappedPharmacy.grupo}`}
                       <br />
                       <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${mappedPharmacy.direccion}, San Luis Capital, San Luis, Argentina}`)}`}
+                        href={getDirectionsUrl(mappedPharmacy, city.name)}
                         target="_blank"
                         rel="noreferrer"
                       >
@@ -769,7 +931,7 @@ function App() {
                 ))}
 
                 {hasPharmacyCoordinates && (
-                  <Marker position={[pharmacy.lat, pharmacy.lng]} icon={pharmacyIcon}>
+                  <Marker position={[pharmacyLat, pharmacyLng]} icon={pharmacyIcon}>
                     <Popup>
                       <strong>{pharmacy.nombre}</strong>
                       <br />
@@ -800,19 +962,20 @@ function App() {
               </div>
             </div>
 
-            {city.id === "san-luis-capital" && (
+            {farmaciasToLocate.length > 0 ? (
               <p className="mt-3 text-xs leading-5 text-slate-500">
                 {geocodingStatus === "loading"
-                  ? `Buscando ubicaciones de farmacias… ${mappedPharmacies.length} de ${farmaciasSanLuisData.farmacias.length} encontradas.`
+                  ? `Buscando ubicaciones de ${locatedLabel}… ${mappedPharmacies.length} de ${farmaciasToLocate.length} encontradas.`
                   : geocodingStatus === "done"
-                    ? `Se ubicaron ${mappedPharmacies.length} de ${farmaciasSanLuisData.farmacias.length} farmacias. Las posiciones se calculan a partir de las direcciones y deben verificarse antes de usarlas como ubicación exacta.`
+                    ? `Se ubicaron ${mappedPharmacies.length} de ${farmaciasToLocate.length} ${locatedLabel}. Las posiciones se calculan a partir de ${selectedCity === "villa-mercedes" ? "los nombres" : "las direcciones"} y deben verificarse antes de usarlas como ubicación exacta.`
                     : "El mapa muestra el centro de la ciudad como referencia."}
               </p>
-            )}
-            {city.id !== "san-luis-capital" && !hasPharmacyCoordinates && (
-              <p className="mt-3 text-xs leading-5 text-slate-500">
-                Todavía no cargamos las ubicaciones de las farmacias de {city.name}.
-              </p>
+            ) : (
+              !hasPharmacyCoordinates && (
+                <p className="mt-3 text-xs leading-5 text-slate-500">
+                  Todavía no cargamos las ubicaciones de las farmacias de {city.name}.
+                </p>
+              )
             )}
           </section>
         )}
@@ -848,30 +1011,30 @@ function App() {
         </section>
 
         <div className="mt-12 overflow-hidden rounded-[24px] border border-white/[0.06] bg-gradient-to-br from-slate-900/60 via-slate-950/40 to-teal-950/20 p-6 text-center shadow-2xl backdrop-blur-sm sm:p-8">
-         <div className="mx-auto flex max-w-2xl flex-col items-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-300 ring-1 ring-teal-500/20">
-           <Sparkles size={18} className="animate-pulse" />
+          <div className="mx-auto flex max-w-2xl flex-col items-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-300 ring-1 ring-teal-500/20">
+              <Sparkles size={18} className="animate-pulse" />
+            </div>
+
+            <h3 className="mt-4 text-xl font-bold tracking-tight text-white sm:text-2xl">
+              ¿Necesitás una aplicación o software a medida?
+            </h3>
+
+            <p className="mt-2 text-sm leading-relaxed text-slate-400">
+              En <span className="font-semibold text-teal-300">IO Red</span> transformamos ideas en soluciones digitales sólidas, escalables y pensadas para hacer crecer tu negocio.
+            </p>
+
+            <a
+              href="https://iored.com.ar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-all duration-300 hover:opacity-90 hover:shadow-[0_0_25px_rgba(45,212,191,0.3)] hover:-translate-y-0.5"
+            >
+              Conocé nuestro trabajo
+              <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+            </a>
           </div>
-    
-          <h3 className="mt-4 text-xl font-bold tracking-tight text-white sm:text-2xl">
-            ¿Necesitás una aplicación o software a medida?
-          </h3>
-    
-         <p className="mt-2 text-sm leading-relaxed text-slate-400">
-           En <span className="font-semibold text-teal-300">IO Red</span> transformamos ideas en soluciones digitales sólidas, escalables y pensadas para hacer crecer tu negocio.
-         </p>
-    
-        <a
-          href="https://iored.com.ar/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-all duration-300 hover:opacity-90 hover:shadow-[0_0_25px_rgba(45,212,191,0.3)] hover:-translate-y-0.5"
-        >
-         Conocé nuestro trabajo
-       <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-       </a>
-      </div>
-     </div>
+        </div>
 
         <footer className="mx-auto mt-10 max-w-3xl border-t border-white/[0.07] pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -895,15 +1058,15 @@ function App() {
               <ArrowRight size={13} />
             </a>
           </div>
-           <p className="mt-8 text-center text-[11px] leading-relaxed tracking-wide text-slate-500/80">
+          <p className="mt-8 text-center text-[11px] leading-relaxed tracking-wide text-slate-500/80">
             <span className="block sm:inline font-medium text-slate-400">
               © {new Date().getFullYear()} <a href="https://iored.com.ar/" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition">IO Red</a>. Todos los derechos reservados.
             </span>
             <span className="hidden sm:inline mx-2 text-slate-700">|</span>
             <span className="block sm:inline text-slate-500 text-[10px]">
-             Información de turnos referencial basada en fuentes oficiales. Geolocalización sujeta a precisión de dispositivo.
+              Información de turnos referencial basada en fuentes oficiales. Geolocalización sujeta a precisión de dispositivo.
             </span>
-           </p>
+          </p>
         </footer>
       </div>
     </main>
