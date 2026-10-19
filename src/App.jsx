@@ -717,7 +717,7 @@ function App() {
                 href="https://iored.com.ar/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute top-4 right-4 z-[1000] flex items-center gap-2 rounded-full border border-teal-500/30 bg-slate-950/80 px-3 py-1.5 text-xs font-medium text-teal-200 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-teal-400 hover:bg-slate-950 shadow-lg"
+                className="absolute bottom-4 right-4 z-[1000] flex items-center gap-2 rounded-full border border-teal-500/30 bg-slate-950/80 px-3 py-1.5 text-xs font-medium text-teal-200 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-teal-400 hover:bg-slate-950 shadow-lg"
              >
              <span className="relative flex h-2 w-2">
              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
