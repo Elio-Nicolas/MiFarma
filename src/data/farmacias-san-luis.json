@@ -1,0 +1,1519 @@
+{
+  "version": 1,
+  "ciudad": "San Luis Capital",
+  "fuente": "Documento oficial Turnos 2026 - Ciudad de San Luis, Ministerio de Salud / Inspección de Farmacias",
+  "horarioTurno": "08:00 a 24:00",
+  "notaCoordenadas": "Las coordenadas están pendientes de geocodificación/verificación. No usar como ubicación exacta hasta comprobarlas.",
+  "grupos": {
+    "A": [
+      {
+        "id": "del-sol",
+        "nombre": "Del Sol",
+        "direccion": "Bº 142 Viv M 329 C 26",
+        "telefono": "2664449281",
+        "lat": null,
+        "lng": null,
+        "grupo": "A",
+        "direccionCompleta": "Bº 142 Viv M 329 C 26, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "mas-farma-san-luis",
+        "nombre": "Mas Farma San Luis",
+        "direccion": "Av del Fundador 1450",
+        "telefono": "2664445179",
+        "lat": null,
+        "lng": null,
+        "grupo": "A",
+        "direccionCompleta": "Av del Fundador 1450, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "d-aloisio",
+        "nombre": "D’Aloisio",
+        "direccion": "G. A. Estrada 2010 Bº San Martín",
+        "telefono": "2664852087",
+        "lat": null,
+        "lng": null,
+        "grupo": "A",
+        "direccionCompleta": "G. A. Estrada 2010 Bº San Martín, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "los-fresnos",
+        "nombre": "Los Fresnos",
+        "direccion": "B° Fresnos Americanos M 67 C 18",
+        "telefono": "2664402296",
+        "lat": null,
+        "lng": null,
+        "grupo": "A",
+        "direccionCompleta": "B° Fresnos Americanos M 67 C 18, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "jun-n",
+        "nombre": "Junín",
+        "direccion": "Granaderos Puntanos 965",
+        "telefono": "2664244073",
+        "lat": null,
+        "lng": null,
+        "grupo": "A",
+        "direccionCompleta": "Granaderos Puntanos 965, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "F": [
+      {
+        "id": "franzi",
+        "nombre": "Franzi",
+        "direccion": "Bº 116 Viv M 267 C 8",
+        "telefono": "2664543101",
+        "lat": null,
+        "lng": null,
+        "grupo": "F",
+        "direccionCompleta": "Bº 116 Viv M 267 C 8, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "santa-rita",
+        "nombre": "Santa Rita",
+        "direccion": "Av J A Roca 660",
+        "telefono": "2664453033",
+        "lat": null,
+        "lng": null,
+        "grupo": "F",
+        "direccionCompleta": "Av J A Roca 660, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "jard-n",
+        "nombre": "Jardín",
+        "direccion": "Calle Proyectada S/N Ruta 146 Km 5",
+        "telefono": "2665298471",
+        "lat": null,
+        "lng": null,
+        "grupo": "F",
+        "direccionCompleta": "Calle Proyectada S/N Ruta 146 Km 5, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-jos",
+        "nombre": "San José",
+        "direccion": "Sargento Baigorria 865",
+        "telefono": "2664345316",
+        "lat": null,
+        "lng": null,
+        "grupo": "F",
+        "direccionCompleta": "Sargento Baigorria 865, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "macrofarma-jard-n",
+        "nombre": "Macrofarma Jardín",
+        "direccion": "Piedra Blanca 2871-B° Jardín San Luis",
+        "telefono": "266011834",
+        "lat": null,
+        "lng": null,
+        "grupo": "F",
+        "direccionCompleta": "Piedra Blanca 2871-B° Jardín San Luis, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "K": [
+      {
+        "id": "san-benito",
+        "nombre": "San Benito",
+        "direccion": "Bº Los Paraísos M 273 C 8",
+        "telefono": "",
+        "lat": null,
+        "lng": null,
+        "grupo": "K",
+        "direccionCompleta": "Bº Los Paraísos M 273 C 8, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "pringles",
+        "nombre": "Pringles",
+        "direccion": "Justo Daract 2133",
+        "telefono": "2664250946",
+        "lat": null,
+        "lng": null,
+        "grupo": "K",
+        "direccionCompleta": "Justo Daract 2133, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "quintana-v",
+        "nombre": "Quintana V",
+        "direccion": "Av Lafinur 148",
+        "telefono": "2664421245",
+        "lat": null,
+        "lng": null,
+        "grupo": "K",
+        "direccionCompleta": "Av Lafinur 148, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "del-pilar-ii",
+        "nombre": "Del Pilar II",
+        "direccion": "Av Centenario esq Villa Elena- Local 5",
+        "telefono": "",
+        "lat": null,
+        "lng": null,
+        "grupo": "K",
+        "direccionCompleta": "Av Centenario esq Villa Elena- Local 5, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "macrofarma-shopping",
+        "nombre": "Macrofarma Shopping",
+        "direccion": "Av Juan Gilberto Funes 260",
+        "telefono": "2664011806",
+        "lat": null,
+        "lng": null,
+        "grupo": "K",
+        "direccionCompleta": "Av Juan Gilberto Funes 260, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "B": [
+      {
+        "id": "alric",
+        "nombre": "Alric",
+        "direccion": "Mayor Palaver 129",
+        "telefono": "2664836333",
+        "lat": null,
+        "lng": null,
+        "grupo": "B",
+        "direccionCompleta": "Mayor Palaver 129, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "del-pilar-iii",
+        "nombre": "Del Pilar III",
+        "direccion": "Bº J. Hernández E. Adaro y Av Lafinur",
+        "telefono": "2664898280",
+        "lat": null,
+        "lng": null,
+        "grupo": "B",
+        "direccionCompleta": "Bº J. Hernández E. Adaro y Av Lafinur, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-nicol-s",
+        "nombre": "San Nicolás",
+        "direccion": "Bº 164 Viv M 456 C 27",
+        "telefono": "2664436534",
+        "lat": null,
+        "lng": null,
+        "grupo": "B",
+        "direccionCompleta": "Bº 164 Viv M 456 C 27, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "del-bosque",
+        "nombre": "Del Bosque",
+        "direccion": "Salvador Segado y Ruta 3 Local 6",
+        "telefono": "2664377085",
+        "lat": null,
+        "lng": null,
+        "grupo": "B",
+        "direccionCompleta": "Salvador Segado y Ruta 3 Local 6, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "G": [
+      {
+        "id": "iribarren",
+        "nombre": "Iribarren",
+        "direccion": "Bº 148 Viv M 359 C 19",
+        "telefono": "2664448579",
+        "lat": null,
+        "lng": null,
+        "grupo": "G",
+        "direccionCompleta": "Bº 148 Viv M 359 C 19, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "muller",
+        "nombre": "Muller",
+        "direccion": "Martín de Loyola 653 (E) Bº AMPYA",
+        "telefono": "2664587769",
+        "lat": null,
+        "lng": null,
+        "grupo": "G",
+        "direccionCompleta": "Martín de Loyola 653 (E) Bº AMPYA, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "italia",
+        "nombre": "Italia",
+        "direccion": "Av Italia 1771",
+        "telefono": "2664367076",
+        "lat": null,
+        "lng": null,
+        "grupo": "G",
+        "direccionCompleta": "Av Italia 1771, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "fenix-oeste",
+        "nombre": "Fenix Oeste",
+        "direccion": "B° A Burgos M B C 14",
+        "telefono": "2664723673",
+        "lat": null,
+        "lng": null,
+        "grupo": "G",
+        "direccionCompleta": "B° A Burgos M B C 14, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "farmacity-suc-373",
+        "nombre": "Farmacity Suc 373",
+        "direccion": "Av España 597",
+        "telefono": "2664709638",
+        "lat": null,
+        "lng": null,
+        "grupo": "G",
+        "direccionCompleta": "Av España 597, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "L": [
+      {
+        "id": "ayacucho",
+        "nombre": "Ayacucho",
+        "direccion": "Ayacucho 1565",
+        "telefono": "2664323008",
+        "lat": null,
+        "lng": null,
+        "grupo": "L",
+        "direccionCompleta": "Ayacucho 1565, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "santa-teresa",
+        "nombre": "Santa Teresa",
+        "direccion": "J Daract y Alte Brown",
+        "telefono": "2665112535",
+        "lat": null,
+        "lng": null,
+        "grupo": "L",
+        "direccionCompleta": "J Daract y Alte Brown, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "catamarca",
+        "nombre": "Catamarca",
+        "direccion": "Catamarca 1784",
+        "telefono": "2664430422",
+        "lat": null,
+        "lng": null,
+        "grupo": "L",
+        "direccionCompleta": "Catamarca 1784, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "quintana-iii",
+        "nombre": "Quintana III",
+        "direccion": "Italia y M de Loyola",
+        "telefono": "2664441879",
+        "lat": null,
+        "lng": null,
+        "grupo": "L",
+        "direccionCompleta": "Italia y M de Loyola, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "rivadavia",
+        "nombre": "Rivadavia",
+        "direccion": "Caídos en Malvinas 27",
+        "telefono": "2664422145",
+        "lat": null,
+        "lng": null,
+        "grupo": "L",
+        "direccionCompleta": "Caídos en Malvinas 27, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "C": [
+      {
+        "id": "del-pilar",
+        "nombre": "Del Pilar",
+        "direccion": "Bº 134 Viv M 290 C 33",
+        "telefono": "2664429749",
+        "lat": null,
+        "lng": null,
+        "grupo": "C",
+        "direccionCompleta": "Bº 134 Viv M 290 C 33, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "falvo",
+        "nombre": "Falvo",
+        "direccion": "Bº El Hornero M 7 C 1",
+        "telefono": "2664457555",
+        "lat": null,
+        "lng": null,
+        "grupo": "C",
+        "direccionCompleta": "Bº El Hornero M 7 C 1, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "puntana",
+        "nombre": "Puntana",
+        "direccion": "Av España 571",
+        "telefono": "2664431303",
+        "lat": null,
+        "lng": null,
+        "grupo": "C",
+        "direccionCompleta": "Av España 571, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "quintana-vi",
+        "nombre": "Quintana VI",
+        "direccion": "Av J. G. Funes 829",
+        "telefono": "2664372366",
+        "lat": null,
+        "lng": null,
+        "grupo": "C",
+        "direccionCompleta": "Av J. G. Funes 829, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "H": [
+      {
+        "id": "del-pilar-i",
+        "nombre": "Del Pilar I",
+        "direccion": "Bº Eva Perón M 5 C 154",
+        "telefono": "2664446888",
+        "lat": null,
+        "lng": null,
+        "grupo": "H",
+        "direccionCompleta": "Bº Eva Perón M 5 C 154, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-isidro",
+        "nombre": "San Isidro",
+        "direccion": "Av Pte Perón 1028",
+        "telefono": "4429105",
+        "lat": null,
+        "lng": null,
+        "grupo": "H",
+        "direccionCompleta": "Av Pte Perón 1028, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-ram-n",
+        "nombre": "San Ramón",
+        "direccion": "Justo Daract 3178 Bº AMEP",
+        "telefono": "2664444679",
+        "lat": null,
+        "lng": null,
+        "grupo": "H",
+        "direccionCompleta": "Justo Daract 3178 Bº AMEP, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "las-lomas",
+        "nombre": "Las Lomas",
+        "direccion": "Los Algarrobos S/N entre Dr Houssay y Los Robles",
+        "telefono": "2664580444",
+        "lat": null,
+        "lng": null,
+        "grupo": "H",
+        "direccionCompleta": "Los Algarrobos S/N entre Dr Houssay y Los Robles, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-rafael",
+        "nombre": "San Rafael",
+        "direccion": "Hilario Ascasubi 161-Loc 3 y 4",
+        "telefono": "2664770702",
+        "lat": null,
+        "lng": null,
+        "grupo": "H",
+        "direccionCompleta": "Hilario Ascasubi 161-Loc 3 y 4, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "M": [
+      {
+        "id": "familifarma",
+        "nombre": "Familifarma",
+        "direccion": "Estac de Interc Regional de Ómnibus",
+        "telefono": "2664421480",
+        "lat": null,
+        "lng": null,
+        "grupo": "M",
+        "direccionCompleta": "Estac de Interc Regional de Ómnibus, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "fleming",
+        "nombre": "Fleming",
+        "direccion": "Riobamba 2184",
+        "telefono": "2664508761",
+        "lat": null,
+        "lng": null,
+        "grupo": "M",
+        "direccionCompleta": "Riobamba 2184, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-crist-bal",
+        "nombre": "San Cristóbal",
+        "direccion": "Sarmiento 1786",
+        "telefono": "2664447882",
+        "lat": null,
+        "lng": null,
+        "grupo": "M",
+        "direccionCompleta": "Sarmiento 1786, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "sarmiento",
+        "nombre": "Sarmiento",
+        "direccion": "Sarmiento 812",
+        "telefono": "2664446282",
+        "lat": null,
+        "lng": null,
+        "grupo": "M",
+        "direccionCompleta": "Sarmiento 812, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "santa-cruz",
+        "nombre": "Santa Cruz",
+        "direccion": "Junín esq Europa S/N Local 19 Mza 12 Complejo PRO.CRE.AR.",
+        "telefono": "2665261928",
+        "lat": null,
+        "lng": null,
+        "grupo": "M",
+        "direccionCompleta": "Junín esq Europa S/N Local 19 Mza 12 Complejo PRO.CRE.AR., San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "D": [
+      {
+        "id": "los-cerros",
+        "nombre": "Los Cerros",
+        "direccion": "Bº 116 Viv M 278 C 11",
+        "telefono": "2664442433",
+        "lat": null,
+        "lng": null,
+        "grupo": "D",
+        "direccionCompleta": "Bº 116 Viv M 278 C 11, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "quintana-vii",
+        "nombre": "Quintana VII",
+        "direccion": "C. en Malvinas 121",
+        "telefono": "2664443575",
+        "lat": null,
+        "lng": null,
+        "grupo": "D",
+        "direccionCompleta": "C. en Malvinas 121, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "gabutti",
+        "nombre": "Gabutti",
+        "direccion": "Bº El Hornero Salvador Segado y Olegario Andrade 395",
+        "telefono": "2664456792",
+        "lat": null,
+        "lng": null,
+        "grupo": "D",
+        "direccionCompleta": "Bº El Hornero Salvador Segado y Olegario Andrade 395, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "sierras-del-sol-sur",
+        "nombre": "Sierras del Sol Sur",
+        "direccion": "Av Pte Perón 33 Local 5 Esq J G Funes",
+        "telefono": "2665053491",
+        "lat": null,
+        "lng": null,
+        "grupo": "D",
+        "direccionCompleta": "Av Pte Perón 33 Local 5 Esq J G Funes, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "I": [
+      {
+        "id": "manr-quez",
+        "nombre": "Manríquez",
+        "direccion": "Av Julio A Roca 1467",
+        "telefono": "",
+        "lat": null,
+        "lng": null,
+        "grupo": "I",
+        "direccionCompleta": "Av Julio A Roca 1467, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "la-3-rotonda",
+        "nombre": "La 3º Rotonda",
+        "direccion": "Bº 125 Viv M 256 C 1",
+        "telefono": "2664420053",
+        "lat": null,
+        "lng": null,
+        "grupo": "I",
+        "direccionCompleta": "Bº 125 Viv M 256 C 1, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "cristo-rey-ii",
+        "nombre": "Cristo Rey II",
+        "direccion": "Av Centenario 580 (E)",
+        "telefono": "2664441207",
+        "lat": null,
+        "lng": null,
+        "grupo": "I",
+        "direccionCompleta": "Av Centenario 580 (E), San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "farma-salud",
+        "nombre": "Farma Salud",
+        "direccion": "Italia y Martín de Loyola",
+        "telefono": "2664436769",
+        "lat": null,
+        "lng": null,
+        "grupo": "I",
+        "direccionCompleta": "Italia y Martín de Loyola, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "los-nogales",
+        "nombre": "Los Nogales",
+        "direccion": "Mza C Casa 16 B° Cerros del Sol",
+        "telefono": "2657213808 - 2664746692",
+        "lat": null,
+        "lng": null,
+        "grupo": "I",
+        "direccionCompleta": "Mza C Casa 16 B° Cerros del Sol, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "N": [
+      {
+        "id": "la-pir-mide",
+        "nombre": "La Pirámide",
+        "direccion": "Ciudad del Rosario 360",
+        "telefono": "2664427895",
+        "lat": null,
+        "lng": null,
+        "grupo": "N",
+        "direccionCompleta": "Ciudad del Rosario 360, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "don-bosco",
+        "nombre": "Don Bosco",
+        "direccion": "Av España 310",
+        "telefono": "2664431279",
+        "lat": null,
+        "lng": null,
+        "grupo": "N",
+        "direccionCompleta": "Av España 310, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "mar-a-del-rosario",
+        "nombre": "María del Rosario",
+        "direccion": "Sucre 2110",
+        "telefono": "2664637071",
+        "lat": null,
+        "lng": null,
+        "grupo": "N",
+        "direccionCompleta": "Sucre 2110, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "macrofarma",
+        "nombre": "Macrofarma",
+        "direccion": "B° 126 Viv Mza 400 Casa 1",
+        "telefono": "",
+        "lat": null,
+        "lng": null,
+        "grupo": "N",
+        "direccionCompleta": "B° 126 Viv Mza 400 Casa 1, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "grupo-oeste",
+        "nombre": "Grupo Oeste",
+        "direccion": "Av V° Centenario S/N Lote N° 14",
+        "telefono": "2665277140",
+        "lat": null,
+        "lng": null,
+        "grupo": "N",
+        "direccionCompleta": "Av V° Centenario S/N Lote N° 14, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "E": [
+      {
+        "id": "san-cayetano",
+        "nombre": "San Cayetano",
+        "direccion": "Bº 142 Viv M 462 C 22",
+        "telefono": "2664426516",
+        "lat": null,
+        "lng": null,
+        "grupo": "E",
+        "direccionCompleta": "Bº 142 Viv M 462 C 22, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "san-el-as",
+        "nombre": "San Elías",
+        "direccion": "Bº El Lince M 17 C 1",
+        "telefono": "2664 329283",
+        "lat": null,
+        "lng": null,
+        "grupo": "E",
+        "direccionCompleta": "Bº El Lince M 17 C 1, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "tello",
+        "nombre": "Tello",
+        "direccion": "Caídos en Malvinas 323",
+        "telefono": "2664431776",
+        "lat": null,
+        "lng": null,
+        "grupo": "E",
+        "direccionCompleta": "Caídos en Malvinas 323, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "del-jard-n",
+        "nombre": "Del Jardín",
+        "direccion": "Bº Jardín San Luis Sarmiento 2995",
+        "telefono": "2664427883",
+        "lat": null,
+        "lng": null,
+        "grupo": "E",
+        "direccionCompleta": "Bº Jardín San Luis Sarmiento 2995, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "los-alamos-lafinur",
+        "nombre": "Los Alamos Lafinur",
+        "direccion": "Lafinur 15",
+        "telefono": "2664586524",
+        "lat": null,
+        "lng": null,
+        "grupo": "E",
+        "direccionCompleta": "Lafinur 15, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "J": [
+      {
+        "id": "miguel-arc-ngel",
+        "nombre": "Miguel Arcángel",
+        "direccion": "Juan Domingo Perón 355",
+        "telefono": "2664709615",
+        "lat": null,
+        "lng": null,
+        "grupo": "J",
+        "direccionCompleta": "Juan Domingo Perón 355, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "cortez",
+        "nombre": "Cortez",
+        "direccion": "Bº 151 Viv M 467 C 8",
+        "telefono": "2664431150",
+        "lat": null,
+        "lng": null,
+        "grupo": "J",
+        "direccionCompleta": "Bº 151 Viv M 467 C 8, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "salvador",
+        "nombre": "Salvador",
+        "direccion": "Justo Daract 1848",
+        "telefono": "2664426438",
+        "lat": null,
+        "lng": null,
+        "grupo": "J",
+        "direccionCompleta": "Justo Daract 1848, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "lucero",
+        "nombre": "Lucero",
+        "direccion": "Av Centenario 92",
+        "telefono": "2664432546",
+        "lat": null,
+        "lng": null,
+        "grupo": "J",
+        "direccionCompleta": "Av Centenario 92, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "farmalider-sur",
+        "nombre": "Farmalider Sur",
+        "direccion": "B° El Lince-Manzana 18 Casa 1",
+        "telefono": "",
+        "lat": null,
+        "lng": null,
+        "grupo": "J",
+        "direccionCompleta": "B° El Lince-Manzana 18 Casa 1, San Luis Capital, San Luis, Argentina"
+      }
+    ],
+    "O": [
+      {
+        "id": "quintana-iv",
+        "nombre": "Quintana IV",
+        "direccion": "Riobamba 1665",
+        "telefono": "2664442300",
+        "lat": null,
+        "lng": null,
+        "grupo": "O",
+        "direccionCompleta": "Riobamba 1665, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "se-or-de-la-quebrada",
+        "nombre": "Señor de la Quebrada",
+        "direccion": "San Juan y Aristóbulo del Valle",
+        "telefono": "2664424152",
+        "lat": null,
+        "lng": null,
+        "grupo": "O",
+        "direccionCompleta": "San Juan y Aristóbulo del Valle, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "mar-a-auxiliadora",
+        "nombre": "María Auxiliadora",
+        "direccion": "Av España 546",
+        "telefono": "2664420907",
+        "lat": null,
+        "lng": null,
+        "grupo": "O",
+        "direccionCompleta": "Av España 546, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "del-sur",
+        "nombre": "Del Sur",
+        "direccion": "B° Serranías Puntanas Mza 4 Casa 11",
+        "telefono": "",
+        "lat": null,
+        "lng": null,
+        "grupo": "O",
+        "direccionCompleta": "B° Serranías Puntanas Mza 4 Casa 11, San Luis Capital, San Luis, Argentina"
+      },
+      {
+        "id": "farmacity-suc-370",
+        "nombre": "Farmacity Suc 370",
+        "direccion": "Sarmiento 796",
+        "telefono": "2664150541",
+        "lat": null,
+        "lng": null,
+        "grupo": "O",
+        "direccionCompleta": "Sarmiento 796, San Luis Capital, San Luis, Argentina"
+      }
+    ]
+  },
+  "permanentes": [
+    {
+      "id": "los-alamos-permanente",
+      "nombre": "Farmacia Los Álamos",
+      "direccion": "Pringles 911, San Luis Capital, San Luis, Argentina",
+      "telefono": "2664446695 / 2664402406",
+      "lat": null,
+      "lng": null,
+      "permanente": true
+    },
+    {
+      "id": "farmacity-suc-91-permanente",
+      "nombre": "Farmacity Sucursal 91",
+      "direccion": "Junín 952, San Luis Capital, San Luis, Argentina",
+      "telefono": "2664446506 / 2664587791",
+      "lat": null,
+      "lng": null,
+      "permanente": true
+    }
+  ],
+  "farmacias": [
+    {
+      "id": "del-sol",
+      "nombre": "Del Sol",
+      "direccion": "Bº 142 Viv M 329 C 26",
+      "telefono": "2664449281",
+      "lat": null,
+      "lng": null,
+      "grupo": "A",
+      "direccionCompleta": "Bº 142 Viv M 329 C 26, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "mas-farma-san-luis",
+      "nombre": "Mas Farma San Luis",
+      "direccion": "Av del Fundador 1450",
+      "telefono": "2664445179",
+      "lat": null,
+      "lng": null,
+      "grupo": "A",
+      "direccionCompleta": "Av del Fundador 1450, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "d-aloisio",
+      "nombre": "D’Aloisio",
+      "direccion": "G. A. Estrada 2010 Bº San Martín",
+      "telefono": "2664852087",
+      "lat": null,
+      "lng": null,
+      "grupo": "A",
+      "direccionCompleta": "G. A. Estrada 2010 Bº San Martín, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "los-fresnos",
+      "nombre": "Los Fresnos",
+      "direccion": "B° Fresnos Americanos M 67 C 18",
+      "telefono": "2664402296",
+      "lat": null,
+      "lng": null,
+      "grupo": "A",
+      "direccionCompleta": "B° Fresnos Americanos M 67 C 18, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "jun-n",
+      "nombre": "Junín",
+      "direccion": "Granaderos Puntanos 965",
+      "telefono": "2664244073",
+      "lat": null,
+      "lng": null,
+      "grupo": "A",
+      "direccionCompleta": "Granaderos Puntanos 965, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "alric",
+      "nombre": "Alric",
+      "direccion": "Mayor Palaver 129",
+      "telefono": "2664836333",
+      "lat": null,
+      "lng": null,
+      "grupo": "B",
+      "direccionCompleta": "Mayor Palaver 129, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-pilar-iii",
+      "nombre": "Del Pilar III",
+      "direccion": "Bº J. Hernández E. Adaro y Av Lafinur",
+      "telefono": "2664898280",
+      "lat": null,
+      "lng": null,
+      "grupo": "B",
+      "direccionCompleta": "Bº J. Hernández E. Adaro y Av Lafinur, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-nicol-s",
+      "nombre": "San Nicolás",
+      "direccion": "Bº 164 Viv M 456 C 27",
+      "telefono": "2664436534",
+      "lat": null,
+      "lng": null,
+      "grupo": "B",
+      "direccionCompleta": "Bº 164 Viv M 456 C 27, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-bosque",
+      "nombre": "Del Bosque",
+      "direccion": "Salvador Segado y Ruta 3 Local 6",
+      "telefono": "2664377085",
+      "lat": null,
+      "lng": null,
+      "grupo": "B",
+      "direccionCompleta": "Salvador Segado y Ruta 3 Local 6, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-pilar",
+      "nombre": "Del Pilar",
+      "direccion": "Bº 134 Viv M 290 C 33",
+      "telefono": "2664429749",
+      "lat": null,
+      "lng": null,
+      "grupo": "C",
+      "direccionCompleta": "Bº 134 Viv M 290 C 33, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "falvo",
+      "nombre": "Falvo",
+      "direccion": "Bº El Hornero M 7 C 1",
+      "telefono": "2664457555",
+      "lat": null,
+      "lng": null,
+      "grupo": "C",
+      "direccionCompleta": "Bº El Hornero M 7 C 1, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "puntana",
+      "nombre": "Puntana",
+      "direccion": "Av España 571",
+      "telefono": "2664431303",
+      "lat": null,
+      "lng": null,
+      "grupo": "C",
+      "direccionCompleta": "Av España 571, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "quintana-vi",
+      "nombre": "Quintana VI",
+      "direccion": "Av J. G. Funes 829",
+      "telefono": "2664372366",
+      "lat": null,
+      "lng": null,
+      "grupo": "C",
+      "direccionCompleta": "Av J. G. Funes 829, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "los-cerros",
+      "nombre": "Los Cerros",
+      "direccion": "Bº 116 Viv M 278 C 11",
+      "telefono": "2664442433",
+      "lat": null,
+      "lng": null,
+      "grupo": "D",
+      "direccionCompleta": "Bº 116 Viv M 278 C 11, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "quintana-vii",
+      "nombre": "Quintana VII",
+      "direccion": "C. en Malvinas 121",
+      "telefono": "2664443575",
+      "lat": null,
+      "lng": null,
+      "grupo": "D",
+      "direccionCompleta": "C. en Malvinas 121, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "gabutti",
+      "nombre": "Gabutti",
+      "direccion": "Bº El Hornero Salvador Segado y Olegario Andrade 395",
+      "telefono": "2664456792",
+      "lat": null,
+      "lng": null,
+      "grupo": "D",
+      "direccionCompleta": "Bº El Hornero Salvador Segado y Olegario Andrade 395, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "sierras-del-sol-sur",
+      "nombre": "Sierras del Sol Sur",
+      "direccion": "Av Pte Perón 33 Local 5 Esq J G Funes",
+      "telefono": "2665053491",
+      "lat": null,
+      "lng": null,
+      "grupo": "D",
+      "direccionCompleta": "Av Pte Perón 33 Local 5 Esq J G Funes, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-cayetano",
+      "nombre": "San Cayetano",
+      "direccion": "Bº 142 Viv M 462 C 22",
+      "telefono": "2664426516",
+      "lat": null,
+      "lng": null,
+      "grupo": "E",
+      "direccionCompleta": "Bº 142 Viv M 462 C 22, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-el-as",
+      "nombre": "San Elías",
+      "direccion": "Bº El Lince M 17 C 1",
+      "telefono": "2664 329283",
+      "lat": null,
+      "lng": null,
+      "grupo": "E",
+      "direccionCompleta": "Bº El Lince M 17 C 1, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "tello",
+      "nombre": "Tello",
+      "direccion": "Caídos en Malvinas 323",
+      "telefono": "2664431776",
+      "lat": null,
+      "lng": null,
+      "grupo": "E",
+      "direccionCompleta": "Caídos en Malvinas 323, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-jard-n",
+      "nombre": "Del Jardín",
+      "direccion": "Bº Jardín San Luis Sarmiento 2995",
+      "telefono": "2664427883",
+      "lat": null,
+      "lng": null,
+      "grupo": "E",
+      "direccionCompleta": "Bº Jardín San Luis Sarmiento 2995, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "los-alamos-lafinur",
+      "nombre": "Los Alamos Lafinur",
+      "direccion": "Lafinur 15",
+      "telefono": "2664586524",
+      "lat": null,
+      "lng": null,
+      "grupo": "E",
+      "direccionCompleta": "Lafinur 15, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "franzi",
+      "nombre": "Franzi",
+      "direccion": "Bº 116 Viv M 267 C 8",
+      "telefono": "2664543101",
+      "lat": null,
+      "lng": null,
+      "grupo": "F",
+      "direccionCompleta": "Bº 116 Viv M 267 C 8, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "santa-rita",
+      "nombre": "Santa Rita",
+      "direccion": "Av J A Roca 660",
+      "telefono": "2664453033",
+      "lat": null,
+      "lng": null,
+      "grupo": "F",
+      "direccionCompleta": "Av J A Roca 660, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "jard-n",
+      "nombre": "Jardín",
+      "direccion": "Calle Proyectada S/N Ruta 146 Km 5",
+      "telefono": "2665298471",
+      "lat": null,
+      "lng": null,
+      "grupo": "F",
+      "direccionCompleta": "Calle Proyectada S/N Ruta 146 Km 5, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-jos",
+      "nombre": "San José",
+      "direccion": "Sargento Baigorria 865",
+      "telefono": "2664345316",
+      "lat": null,
+      "lng": null,
+      "grupo": "F",
+      "direccionCompleta": "Sargento Baigorria 865, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "macrofarma-jard-n",
+      "nombre": "Macrofarma Jardín",
+      "direccion": "Piedra Blanca 2871-B° Jardín San Luis",
+      "telefono": "266011834",
+      "lat": null,
+      "lng": null,
+      "grupo": "F",
+      "direccionCompleta": "Piedra Blanca 2871-B° Jardín San Luis, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "iribarren",
+      "nombre": "Iribarren",
+      "direccion": "Bº 148 Viv M 359 C 19",
+      "telefono": "2664448579",
+      "lat": null,
+      "lng": null,
+      "grupo": "G",
+      "direccionCompleta": "Bº 148 Viv M 359 C 19, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "muller",
+      "nombre": "Muller",
+      "direccion": "Martín de Loyola 653 (E) Bº AMPYA",
+      "telefono": "2664587769",
+      "lat": null,
+      "lng": null,
+      "grupo": "G",
+      "direccionCompleta": "Martín de Loyola 653 (E) Bº AMPYA, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "italia",
+      "nombre": "Italia",
+      "direccion": "Av Italia 1771",
+      "telefono": "2664367076",
+      "lat": null,
+      "lng": null,
+      "grupo": "G",
+      "direccionCompleta": "Av Italia 1771, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "fenix-oeste",
+      "nombre": "Fenix Oeste",
+      "direccion": "B° A Burgos M B C 14",
+      "telefono": "2664723673",
+      "lat": null,
+      "lng": null,
+      "grupo": "G",
+      "direccionCompleta": "B° A Burgos M B C 14, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "farmacity-suc-373",
+      "nombre": "Farmacity Suc 373",
+      "direccion": "Av España 597",
+      "telefono": "2664709638",
+      "lat": null,
+      "lng": null,
+      "grupo": "G",
+      "direccionCompleta": "Av España 597, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-pilar-i",
+      "nombre": "Del Pilar I",
+      "direccion": "Bº Eva Perón M 5 C 154",
+      "telefono": "2664446888",
+      "lat": null,
+      "lng": null,
+      "grupo": "H",
+      "direccionCompleta": "Bº Eva Perón M 5 C 154, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-isidro",
+      "nombre": "San Isidro",
+      "direccion": "Av Pte Perón 1028",
+      "telefono": "4429105",
+      "lat": null,
+      "lng": null,
+      "grupo": "H",
+      "direccionCompleta": "Av Pte Perón 1028, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-ram-n",
+      "nombre": "San Ramón",
+      "direccion": "Justo Daract 3178 Bº AMEP",
+      "telefono": "2664444679",
+      "lat": null,
+      "lng": null,
+      "grupo": "H",
+      "direccionCompleta": "Justo Daract 3178 Bº AMEP, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "las-lomas",
+      "nombre": "Las Lomas",
+      "direccion": "Los Algarrobos S/N entre Dr Houssay y Los Robles",
+      "telefono": "2664580444",
+      "lat": null,
+      "lng": null,
+      "grupo": "H",
+      "direccionCompleta": "Los Algarrobos S/N entre Dr Houssay y Los Robles, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-rafael",
+      "nombre": "San Rafael",
+      "direccion": "Hilario Ascasubi 161-Loc 3 y 4",
+      "telefono": "2664770702",
+      "lat": null,
+      "lng": null,
+      "grupo": "H",
+      "direccionCompleta": "Hilario Ascasubi 161-Loc 3 y 4, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "manr-quez",
+      "nombre": "Manríquez",
+      "direccion": "Av Julio A Roca 1467",
+      "telefono": "",
+      "lat": null,
+      "lng": null,
+      "grupo": "I",
+      "direccionCompleta": "Av Julio A Roca 1467, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "la-3-rotonda",
+      "nombre": "La 3º Rotonda",
+      "direccion": "Bº 125 Viv M 256 C 1",
+      "telefono": "2664420053",
+      "lat": null,
+      "lng": null,
+      "grupo": "I",
+      "direccionCompleta": "Bº 125 Viv M 256 C 1, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "cristo-rey-ii",
+      "nombre": "Cristo Rey II",
+      "direccion": "Av Centenario 580 (E)",
+      "telefono": "2664441207",
+      "lat": null,
+      "lng": null,
+      "grupo": "I",
+      "direccionCompleta": "Av Centenario 580 (E), San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "farma-salud",
+      "nombre": "Farma Salud",
+      "direccion": "Italia y Martín de Loyola",
+      "telefono": "2664436769",
+      "lat": null,
+      "lng": null,
+      "grupo": "I",
+      "direccionCompleta": "Italia y Martín de Loyola, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "los-nogales",
+      "nombre": "Los Nogales",
+      "direccion": "Mza C Casa 16 B° Cerros del Sol",
+      "telefono": "2657213808 - 2664746692",
+      "lat": null,
+      "lng": null,
+      "grupo": "I",
+      "direccionCompleta": "Mza C Casa 16 B° Cerros del Sol, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "miguel-arc-ngel",
+      "nombre": "Miguel Arcángel",
+      "direccion": "Juan Domingo Perón 355",
+      "telefono": "2664709615",
+      "lat": null,
+      "lng": null,
+      "grupo": "J",
+      "direccionCompleta": "Juan Domingo Perón 355, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "cortez",
+      "nombre": "Cortez",
+      "direccion": "Bº 151 Viv M 467 C 8",
+      "telefono": "2664431150",
+      "lat": null,
+      "lng": null,
+      "grupo": "J",
+      "direccionCompleta": "Bº 151 Viv M 467 C 8, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "salvador",
+      "nombre": "Salvador",
+      "direccion": "Justo Daract 1848",
+      "telefono": "2664426438",
+      "lat": null,
+      "lng": null,
+      "grupo": "J",
+      "direccionCompleta": "Justo Daract 1848, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "lucero",
+      "nombre": "Lucero",
+      "direccion": "Av Centenario 92",
+      "telefono": "2664432546",
+      "lat": null,
+      "lng": null,
+      "grupo": "J",
+      "direccionCompleta": "Av Centenario 92, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "farmalider-sur",
+      "nombre": "Farmalider Sur",
+      "direccion": "B° El Lince-Manzana 18 Casa 1",
+      "telefono": "",
+      "lat": null,
+      "lng": null,
+      "grupo": "J",
+      "direccionCompleta": "B° El Lince-Manzana 18 Casa 1, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-benito",
+      "nombre": "San Benito",
+      "direccion": "Bº Los Paraísos M 273 C 8",
+      "telefono": "",
+      "lat": null,
+      "lng": null,
+      "grupo": "K",
+      "direccionCompleta": "Bº Los Paraísos M 273 C 8, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "pringles",
+      "nombre": "Pringles",
+      "direccion": "Justo Daract 2133",
+      "telefono": "2664250946",
+      "lat": null,
+      "lng": null,
+      "grupo": "K",
+      "direccionCompleta": "Justo Daract 2133, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "quintana-v",
+      "nombre": "Quintana V",
+      "direccion": "Av Lafinur 148",
+      "telefono": "2664421245",
+      "lat": null,
+      "lng": null,
+      "grupo": "K",
+      "direccionCompleta": "Av Lafinur 148, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-pilar-ii",
+      "nombre": "Del Pilar II",
+      "direccion": "Av Centenario esq Villa Elena- Local 5",
+      "telefono": "",
+      "lat": null,
+      "lng": null,
+      "grupo": "K",
+      "direccionCompleta": "Av Centenario esq Villa Elena- Local 5, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "macrofarma-shopping",
+      "nombre": "Macrofarma Shopping",
+      "direccion": "Av Juan Gilberto Funes 260",
+      "telefono": "2664011806",
+      "lat": null,
+      "lng": null,
+      "grupo": "K",
+      "direccionCompleta": "Av Juan Gilberto Funes 260, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "ayacucho",
+      "nombre": "Ayacucho",
+      "direccion": "Ayacucho 1565",
+      "telefono": "2664323008",
+      "lat": null,
+      "lng": null,
+      "grupo": "L",
+      "direccionCompleta": "Ayacucho 1565, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "santa-teresa",
+      "nombre": "Santa Teresa",
+      "direccion": "J Daract y Alte Brown",
+      "telefono": "2665112535",
+      "lat": null,
+      "lng": null,
+      "grupo": "L",
+      "direccionCompleta": "J Daract y Alte Brown, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "catamarca",
+      "nombre": "Catamarca",
+      "direccion": "Catamarca 1784",
+      "telefono": "2664430422",
+      "lat": null,
+      "lng": null,
+      "grupo": "L",
+      "direccionCompleta": "Catamarca 1784, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "quintana-iii",
+      "nombre": "Quintana III",
+      "direccion": "Italia y M de Loyola",
+      "telefono": "2664441879",
+      "lat": null,
+      "lng": null,
+      "grupo": "L",
+      "direccionCompleta": "Italia y M de Loyola, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "rivadavia",
+      "nombre": "Rivadavia",
+      "direccion": "Caídos en Malvinas 27",
+      "telefono": "2664422145",
+      "lat": null,
+      "lng": null,
+      "grupo": "L",
+      "direccionCompleta": "Caídos en Malvinas 27, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "familifarma",
+      "nombre": "Familifarma",
+      "direccion": "Estac de Interc Regional de Ómnibus",
+      "telefono": "2664421480",
+      "lat": null,
+      "lng": null,
+      "grupo": "M",
+      "direccionCompleta": "Estac de Interc Regional de Ómnibus, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "fleming",
+      "nombre": "Fleming",
+      "direccion": "Riobamba 2184",
+      "telefono": "2664508761",
+      "lat": null,
+      "lng": null,
+      "grupo": "M",
+      "direccionCompleta": "Riobamba 2184, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "san-crist-bal",
+      "nombre": "San Cristóbal",
+      "direccion": "Sarmiento 1786",
+      "telefono": "2664447882",
+      "lat": null,
+      "lng": null,
+      "grupo": "M",
+      "direccionCompleta": "Sarmiento 1786, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "sarmiento",
+      "nombre": "Sarmiento",
+      "direccion": "Sarmiento 812",
+      "telefono": "2664446282",
+      "lat": null,
+      "lng": null,
+      "grupo": "M",
+      "direccionCompleta": "Sarmiento 812, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "santa-cruz",
+      "nombre": "Santa Cruz",
+      "direccion": "Junín esq Europa S/N Local 19 Mza 12 Complejo PRO.CRE.AR.",
+      "telefono": "2665261928",
+      "lat": null,
+      "lng": null,
+      "grupo": "M",
+      "direccionCompleta": "Junín esq Europa S/N Local 19 Mza 12 Complejo PRO.CRE.AR., San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "la-pir-mide",
+      "nombre": "La Pirámide",
+      "direccion": "Ciudad del Rosario 360",
+      "telefono": "2664427895",
+      "lat": null,
+      "lng": null,
+      "grupo": "N",
+      "direccionCompleta": "Ciudad del Rosario 360, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "don-bosco",
+      "nombre": "Don Bosco",
+      "direccion": "Av España 310",
+      "telefono": "2664431279",
+      "lat": null,
+      "lng": null,
+      "grupo": "N",
+      "direccionCompleta": "Av España 310, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "mar-a-del-rosario",
+      "nombre": "María del Rosario",
+      "direccion": "Sucre 2110",
+      "telefono": "2664637071",
+      "lat": null,
+      "lng": null,
+      "grupo": "N",
+      "direccionCompleta": "Sucre 2110, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "macrofarma",
+      "nombre": "Macrofarma",
+      "direccion": "B° 126 Viv Mza 400 Casa 1",
+      "telefono": "",
+      "lat": null,
+      "lng": null,
+      "grupo": "N",
+      "direccionCompleta": "B° 126 Viv Mza 400 Casa 1, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "grupo-oeste",
+      "nombre": "Grupo Oeste",
+      "direccion": "Av V° Centenario S/N Lote N° 14",
+      "telefono": "2665277140",
+      "lat": null,
+      "lng": null,
+      "grupo": "N",
+      "direccionCompleta": "Av V° Centenario S/N Lote N° 14, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "quintana-iv",
+      "nombre": "Quintana IV",
+      "direccion": "Riobamba 1665",
+      "telefono": "2664442300",
+      "lat": null,
+      "lng": null,
+      "grupo": "O",
+      "direccionCompleta": "Riobamba 1665, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "se-or-de-la-quebrada",
+      "nombre": "Señor de la Quebrada",
+      "direccion": "San Juan y Aristóbulo del Valle",
+      "telefono": "2664424152",
+      "lat": null,
+      "lng": null,
+      "grupo": "O",
+      "direccionCompleta": "San Juan y Aristóbulo del Valle, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "mar-a-auxiliadora",
+      "nombre": "María Auxiliadora",
+      "direccion": "Av España 546",
+      "telefono": "2664420907",
+      "lat": null,
+      "lng": null,
+      "grupo": "O",
+      "direccionCompleta": "Av España 546, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "del-sur",
+      "nombre": "Del Sur",
+      "direccion": "B° Serranías Puntanas Mza 4 Casa 11",
+      "telefono": "",
+      "lat": null,
+      "lng": null,
+      "grupo": "O",
+      "direccionCompleta": "B° Serranías Puntanas Mza 4 Casa 11, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "farmacity-suc-370",
+      "nombre": "Farmacity Suc 370",
+      "direccion": "Sarmiento 796",
+      "telefono": "2664150541",
+      "lat": null,
+      "lng": null,
+      "grupo": "O",
+      "direccionCompleta": "Sarmiento 796, San Luis Capital, San Luis, Argentina"
+    },
+    {
+      "id": "los-alamos-permanente",
+      "nombre": "Farmacia Los Álamos",
+      "direccion": "Pringles 911, San Luis Capital, San Luis, Argentina",
+      "telefono": "2664446695 / 2664402406",
+      "lat": null,
+      "lng": null,
+      "permanente": true
+    },
+    {
+      "id": "farmacity-suc-91-permanente",
+      "nombre": "Farmacity Sucursal 91",
+      "direccion": "Junín 952, San Luis Capital, San Luis, Argentina",
+      "telefono": "2664446506 / 2664587791",
+      "lat": null,
+      "lng": null,
+      "permanente": true
+    }
+  ]
+}

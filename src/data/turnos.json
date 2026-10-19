@@ -1,0 +1,23 @@
+
+{
+  "version": 1,
+  "timezone": "America/Argentina/San_Luis",
+  "ciudades": {
+    "villa-mercedes": {
+      "nombre": "Villa Mercedes",
+      "centro": {
+        "lat": -33.6757,
+        "lng": -65.4578
+      },
+      "turnos": {}
+    },
+    "san-luis-capital": {
+      "nombre": "San Luis Capital",
+      "centro": {
+        "lat": -33.3017,
+        "lng": -66.3378
+      },
+      "turnos": {}
+    }
+  }
+}
