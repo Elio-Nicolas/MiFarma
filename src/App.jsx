@@ -87,15 +87,15 @@ const pharmacyIconMuted = L.divIcon({
   className: "pharmacy-marker",
   html: `
     <div style="
-      width:34px;height:34px;border-radius:13px;
+      width:42px;height:42px;border-radius:16px;
       display:flex;align-items:center;justify-content:center;
-      background:#64748b;border:3px solid #cbd5e1;
-      color:#0f172a;font-size:18px;opacity:.85;
+      background:#94a3b8;border:3px solid #e2e8f0;
+      color:#0f172a;font-size:23px;opacity:.55;
     ">✚</div>
   `,
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
-  popupAnchor: [0, -16]
+  iconSize: [42, 42],
+  iconAnchor: [21, 21],
+  popupAnchor: [0, -20]
 });
 
 const userIcon = L.divIcon({
@@ -1132,6 +1132,24 @@ function App() {
       : { key: "sin-turno", label: `Sin turno ${dayWord}` };
   }
 
+  // Marcadores visibles. Villa Mercedes: las de turno y, si hay ubicación, las
+  // 3 más cercanas sin turno (desvanecidas). San Luis: todas, como antes.
+  const visiblePharmacies = useMemo(() => {
+    if (selectedCity !== "villa-mercedes") return mappedPharmacies;
+
+    const duty = mappedPharmacies.filter((item) => dutyIds.has(item.id));
+    if (!userPosition) return duty;
+
+    const closest = mappedPharmacies
+      .filter((item) => !dutyIds.has(item.id))
+      .map((item) => ({ item, distance: distanceKm(userPosition, item) }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 3)
+      .map(({ item }) => item);
+
+    return [...duty, ...closest];
+  }, [selectedCity, mappedPharmacies, dutyIds, userPosition]);
+
   // La más cercana a la persona (de turno o no) y la de turno más cercana.
   const nearby = useMemo(() => {
     if (!userPosition || mappedPharmacies.length === 0) return null;
@@ -1147,18 +1165,29 @@ function App() {
     };
   }, [userPosition, mappedPharmacies, dutyIds]);
 
+  // Villa Mercedes: sin ubicación de la persona solo se buscan las de turno;
+  // con ubicación se buscan todas (hacen falta para calcular las más cercanas).
+  const locateList = useMemo(() => {
+    if (selectedCity === "villa-mercedes" && !userPosition) {
+      return farmaciasToLocate.filter((item) => dutyIds.has(item.id));
+    }
+    return farmaciasToLocate;
+  }, [selectedCity, userPosition, farmaciasToLocate, dutyIds]);
+
   useEffect(() => {
     const config = GEOCODING_CONFIG[selectedCity];
 
-    if (!config || farmaciasToLocate.length === 0) {
+    if (!config || locateList.length === 0) {
       setMappedPharmacies([]);
       setGeocodingStatus("idle");
       return;
     }
 
     let cancelled = false;
+    let blocked = false;
 
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const DAY_MS = 24 * 60 * 60 * 1000;
 
     async function locatePharmacies() {
       setGeocodingStatus("loading");
@@ -1171,12 +1200,10 @@ function App() {
       }
 
       const cityCenter = CITIES.find((item) => item.id === selectedCity);
-      const source = farmaciasToLocate;
+      const gentle = selectedCity === "villa-mercedes";
       const located = [];
-      const pending = source.filter((item) => !cache[item.id]);
 
-      for (let index = 0; index < source.length; index += 1) {
-        const item = source[index];
+      for (const item of locateList) {
         const saved = cache[item.id];
         if (saved && Number.isFinite(saved.lat) && Number.isFinite(saved.lng)) {
           located.push({ ...item, lat: saved.lat, lng: saved.lng });
@@ -1184,52 +1211,133 @@ function App() {
       }
       if (!cancelled) setMappedPharmacies([...located]);
 
-      for (let start = 0; start < pending.length; start += 3) {
-        if (cancelled) return;
-        const batch = pending.slice(start, start + 3);
-        const results = await Promise.all(batch.map(async (item) => {
-          // Sin dirección cargada se busca por nombre ("Farmacia X").
-          const query = [
-            item.direccion ? item.nombre : `Farmacia ${item.nombre}`,
-            item.direccion,
-            config.localidad,
-            "Argentina"
-          ]
-            .filter(Boolean)
-            .join(", ");
-          try {
-            const byName = !item.direccion;
-            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=${byName ? 5 : 1}&lat=${cityCenter.lat}&lon=${cityCenter.lng}`;
-            const response = await fetch(url);
-            if (!response.ok) return null;
-            const result = await response.json();
-            const features = result.features ?? [];
-            const feature = byName
-              ? features.find((candidate) => matchesPharmacyName(candidate, item))
-              : features[0];
-            const coordinates = feature?.geometry?.coordinates;
-            if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
-            const candidate = { lng: coordinates[0], lat: coordinates[1] };
-            if (distanceKm(candidate, cityCenter) > config.maxDistanceKm) return null;
-            return { ...item, ...candidate };
-          } catch {
-            return null;
-          }
-        }));
+      // Pendientes: las que no están en caché (o fallaron hace más de un día).
+      // Las de turno van primero: son las que la persona necesita ya.
+      const pending = locateList
+        .filter((item) => {
+          const saved = cache[item.id];
+          if (!saved) return true;
+          return Boolean(saved.failedAt) && Date.now() - saved.failedAt > DAY_MS;
+        })
+        .sort((a, b) => Number(dutyIds.has(b.id)) - Number(dutyIds.has(a.id)));
 
-        if (cancelled) return;
-        for (const result of results) {
-          if (!result) continue;
-          cache[result.id] = { lat: result.lat, lng: result.lng };
-          located.push(result);
-        }
-        setMappedPharmacies([...located]);
+      function persist() {
         try {
           localStorage.setItem(config.cacheKey, JSON.stringify(cache));
         } catch {
           // La app sigue funcionando aunque el navegador no permita guardar caché.
         }
-        await wait(350);
+      }
+
+      function record(result) {
+        cache[result.id] = { lat: result.lat, lng: result.lng };
+        located.push(result);
+      }
+
+      async function lookup(item) {
+        // Sin dirección cargada se busca por nombre ("Farmacia X").
+        const query = [
+          item.direccion ? item.nombre : `Farmacia ${item.nombre}`,
+          item.direccion,
+          config.localidad,
+          "Argentina"
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+        try {
+          const isDuty = dutyIds.has(item.id);
+          const byName = !item.direccion && !isDuty;
+          const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=${byName ? 5 : 1}&lat=${cityCenter.lat}&lon=${cityCenter.lng}`;
+          const response = await fetch(url);
+
+          // El servicio está limitando los pedidos: no insistir.
+          if (response.status === 429 || response.status === 403) {
+            blocked = true;
+            return null;
+          }
+          if (!response.ok) return null;
+
+          const result = await response.json();
+          const features = result.features ?? [];
+          const inRange = (candidate) => {
+            const point = candidate?.geometry?.coordinates;
+            return (
+              Array.isArray(point) &&
+              point.length >= 2 &&
+              distanceKm({ lat: point[1], lng: point[0] }, cityCenter) <=
+                config.maxDistanceKm
+            );
+          };
+          // Primero una farmacia que coincida con el nombre; si no hay,
+          // el primer resultado dentro de la zona (posición aproximada).
+          const feature = byName
+            ? features.find((candidate) => matchesPharmacyName(candidate, item)) ??
+              features.find(inRange)
+            : features[0];
+          const coordinates = feature?.geometry?.coordinates;
+          if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+
+          const candidate = { lng: coordinates[0], lat: coordinates[1] };
+          if (distanceKm(candidate, cityCenter) > config.maxDistanceKm) return null;
+          return { ...item, ...candidate };
+        } catch {
+          return null;
+        }
+      }
+
+      if (!gentle) {
+        // San Luis: lotes de 3, igual que antes.
+        for (let start = 0; start < pending.length; start += 3) {
+          if (cancelled) return;
+          const results = await Promise.all(pending.slice(start, start + 3).map(lookup));
+
+          if (cancelled) return;
+          results.forEach((result) => {
+            if (result) record(result);
+          });
+          setMappedPharmacies([...located]);
+          persist();
+          await wait(350);
+        }
+      } else {
+        const dutyPending = pending.filter((item) => dutyIds.has(item.id));
+        const restPending = pending.filter((item) => !dutyIds.has(item.id));
+
+        // 1) Las de turno (2 o 3 pedidos), con un reintento si alguna falla.
+        let todo = dutyPending;
+        for (let attempt = 0; attempt < 2 && todo.length > 0; attempt += 1) {
+          if (attempt > 0) await wait(1500);
+          if (cancelled) return;
+
+          const results = await Promise.all(todo.map(lookup));
+          if (cancelled) return;
+
+          const failed = [];
+          results.forEach((result, index) => {
+            if (result) record(result);
+            else failed.push(todo[index]);
+          });
+          setMappedPharmacies([...located]);
+          persist();
+          todo = failed;
+        }
+
+        // 2) El resto (para calcular las más cercanas): de a una y despacio.
+        //    Si el servicio bloquea, se corta y se reintenta en otra visita.
+        for (const item of restPending) {
+          if (cancelled || blocked) break;
+
+          const result = await lookup(item);
+          if (cancelled) return;
+
+          if (result) record(result);
+          else if (!blocked) cache[item.id] = { failedAt: Date.now() };
+
+          setMappedPharmacies([...located]);
+          persist();
+          await wait(1000);
+        }
       }
 
       if (!cancelled) setGeocodingStatus("done");
@@ -1239,7 +1347,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [selectedCity, farmaciasToLocate]);
+  }, [selectedCity, locateList, dutyIds]);
 
   const pharmacy = shift?.farmacia;
   const pharmacyLat = pharmacy?.lat;
@@ -1511,7 +1619,7 @@ function App() {
               positionRequest={positionRequest}
               geocodingStatus={geocodingStatus}
               locatedCount={mappedPharmacies.length}
-              totalCount={farmaciasToLocate.length}
+              totalCount={locateList.length}
               nearby={nearby}
               getStatus={getStatus}
               onRetryLocation={refreshUserPosition}
@@ -1745,7 +1853,7 @@ function App() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {mappedPharmacies.map((mappedPharmacy) => (
+                {visiblePharmacies.map((mappedPharmacy) => (
                   <Marker
                     key={mappedPharmacy.id}
                     position={[mappedPharmacy.lat, mappedPharmacy.lng]}
@@ -1807,21 +1915,21 @@ function App() {
               <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-xl border border-white/10 bg-[#08111f]/90 px-3 py-2 text-xs font-medium text-slate-200 shadow-lg backdrop-blur-md">
                 <span className="mr-2 inline-block h-2 w-2 rounded-full bg-blue-400" />
                 Tu ubicación
-                {mappedPharmacies.length > 0 && (
+                {visiblePharmacies.length > 0 && (
                   <span className="ml-3">
                     <span className="mr-2 inline-block h-2 w-2 rounded-full bg-teal-300" />
-                    Farmacias ({mappedPharmacies.length})
+                    Farmacias ({visiblePharmacies.length})
                   </span>
                 )}
               </div>
             </div>
 
-            {farmaciasToLocate.length > 0 ? (
+            {locateList.length > 0 ? (
               <p className="mt-3 text-xs leading-5 text-slate-500">
                 {geocodingStatus === "loading"
-                  ? `Buscando ubicaciones de ${locatedLabel}… ${mappedPharmacies.length} de ${farmaciasToLocate.length} encontradas.`
+                  ? `Buscando ubicaciones de ${locatedLabel}… ${mappedPharmacies.length} de ${locateList.length} encontradas.`
                   : geocodingStatus === "done"
-                    ? `Se ubicaron ${mappedPharmacies.length} de ${farmaciasToLocate.length} ${locatedLabel}. Las posiciones se calculan a partir de ${selectedCity === "villa-mercedes" ? "los nombres" : "las direcciones"} y deben verificarse antes de usarlas como ubicación exacta.`
+                    ? `Se ubicaron ${mappedPharmacies.length} de ${locateList.length} ${locatedLabel}. Las posiciones se calculan a partir de ${selectedCity === "villa-mercedes" ? "los nombres" : "las direcciones"} y deben verificarse antes de usarlas como ubicación exacta.`
                     : "El mapa muestra el centro de la ciudad como referencia."}
               </p>
             ) : (
