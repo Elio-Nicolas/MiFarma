@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Clock3,
   Cross,
+  Info,
   LocateFixed,
   MapPin,
   MapPinned,
@@ -25,14 +26,23 @@ import {
   RefreshCw,
   Share2,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  X
 } from "lucide-react";
 
 import turnosData from "./data/turnos.json";
 import farmaciasSanLuisData from "./data/farmacias-san-luis.json";
 import farmaciasVillaMercedesData from "./data/farmacias-villa-mercedes.json";
+import farmaciasJustoDaractData from "./data/farmacias-justo-daract.json";
 
 const TIMEZONE = "America/Argentina/San_Luis";
+
+// Ciudades cuyo turno sale de un calendario (día -> grupo) y un listado de
+// farmacias por grupo.
+const GROUP_CITY_DATA = {
+  "villa-mercedes": farmaciasVillaMercedesData,
+  "justo-daract": farmaciasJustoDaractData
+};
 
 const CITIES = [
   {
@@ -42,6 +52,14 @@ const CITIES = [
     lat: -33.6757,
     lng: -65.4578,
     radiusKm: 20
+  },
+  {
+    id: "justo-daract",
+    name: "Justo Daract",
+    subtitle: "Provincia de San Luis",
+    lat: -33.8658,
+    lng: -65.1778,
+    radiusKm: 8
   },
   {
     id: "san-luis-capital",
@@ -59,6 +77,11 @@ const GEOCODING_CONFIG = {
     cacheKey: "farmacias-sl-geocoding-v1",
     localidad: "San Luis",
     maxDistanceKm: 25
+  },
+  "justo-daract": {
+    cacheKey: "farmacias-jd-geocoding-v1",
+    localidad: "Justo Daract, San Luis",
+    maxDistanceKm: 10
   },
   "villa-mercedes": {
     cacheKey: "farmacias-vm-geocoding-v2",
@@ -234,21 +257,21 @@ function getTelHref(phone) {
   return `tel:${first}`;
 }
 
-// Villa Mercedes: el turno sale del calendario (día -> grupo) y del listado de
-// farmacias de cada grupo. Un grupo puede tener 2 o 3 farmacias de turno.
-function getVillaMercedesShift(date) {
+// Ciudades por grupo: el turno sale del calendario (día -> grupo) y del
+// listado de farmacias de cada grupo. Un grupo puede tener 1, 2 o 3 farmacias.
+function getGroupShift(cityId, date) {
+  const data = GROUP_CITY_DATA[cityId];
+  if (!data) return null;
+
   const [year, month, day] = date.split("-");
-  const group =
-    farmaciasVillaMercedesData.calendario?.[`${year}-${month}`]?.[
-      String(Number(day))
-    ];
+  const group = data.calendario?.[`${year}-${month}`]?.[String(Number(day))];
 
   if (!group) return null;
 
-  const farmacias = farmaciasVillaMercedesData.grupos?.[group];
+  const farmacias = data.grupos?.[group];
   if (!farmacias?.length) return null;
 
-  const horarioTurno = farmaciasVillaMercedesData.horarioTurno;
+  const horarioTurno = data.horarioTurno;
 
   return {
     grupo: group,
@@ -258,10 +281,8 @@ function getVillaMercedesShift(date) {
 }
 
 function getShift(cityId, date) {
-  if (cityId === "villa-mercedes") {
-    const groupShift = getVillaMercedesShift(date);
-    if (groupShift) return groupShift;
-  }
+  const groupShift = getGroupShift(cityId, date);
+  if (groupShift) return groupShift;
 
   const city = turnosData.ciudades?.[cityId];
   const shift = city?.turnos?.[date];
@@ -737,8 +758,8 @@ function formatShortDate(dateString) {
 function getUpcomingTurns(cityId, item, fromDate, limit = 8) {
   const dates = [];
 
-  if (cityId === "villa-mercedes" && item.grupo) {
-    const calendar = farmaciasVillaMercedesData.calendario ?? {};
+  if (GROUP_CITY_DATA[cityId] && item.grupo) {
+    const calendar = GROUP_CITY_DATA[cityId].calendario ?? {};
 
     for (const [monthKey, days] of Object.entries(calendar)) {
       for (const [day, group] of Object.entries(days)) {
@@ -760,6 +781,225 @@ function getUpcomingTurns(cityId, item, fromDate, limit = 8) {
   }
 
   return dates.filter((date) => date >= fromDate).sort().slice(0, limit);
+}
+
+const ABOUT_STATUS_GUIDE = [
+  {
+    key: "turno",
+    label: "De turno hoy",
+    text: "La farmacia está en el grupo de turno de esa fecha."
+  },
+  {
+    key: "24h",
+    label: "Abierta 24 h",
+    text: "Es una farmacia permanente."
+  },
+  {
+    key: "sin-turno",
+    label: "Sin turno hoy",
+    text: "No está de turno, así que puede estar cerrada. Llamá antes de ir."
+  },
+  {
+    key: "desconocido",
+    label: "Confirmá el horario llamando",
+    text: "No tenemos el dato de turno de esa farmacia para la fecha."
+  }
+];
+
+function AboutSection({ title, children }) {
+  return (
+    <section className="mt-6">
+      <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-teal-200/80">
+        {title}
+      </h3>
+      <div className="mt-2 space-y-2 text-sm leading-6 text-slate-300">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+// "Acerca de": qué hace la app, por qué existe, cómo usarla y cómo leer lo que muestra.
+function AboutDialog({ open, onClose }) {
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const onKey = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[3000] flex items-end justify-center bg-black/60 sm:items-center sm:p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="about-title"
+        onClick={(event) => event.stopPropagation()}
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] border border-white/[0.09] bg-[#0b1727] p-5 shadow-2xl sm:rounded-[28px] sm:p-6"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-200/80">
+              Acerca de
+            </p>
+            <h2
+              id="about-title"
+              className="mt-1 text-xl font-semibold tracking-tight text-white"
+            >
+              Cómo funciona Farmacias SL
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="rounded-xl p-2 text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <AboutSection title="¿Para qué sirve?">
+          <p>
+            Te dice qué farmacia está de turno hoy, o el día que elijas, en
+            Villa Mercedes, Justo Daract y San Luis Capital, y cuál es la más
+            cercana a donde estás. Desde ahí podés verla en el mapa, llamar,
+            pedir cómo llegar y compartirla por WhatsApp.
+          </p>
+        </AboutSection>
+
+        <AboutSection title="¿Por qué existe?">
+          <p>
+            Los turnos se publican como planillas: un calendario con una letra
+            por día y otro listado que dice qué farmacias forman cada grupo.
+            Para saber cuál está de turno hay que cruzar las dos tablas, y casi
+            siempre justo cuando hay apuro.
+          </p>
+          <p>
+            Esta app hace ese cruce por vos y le suma el mapa, la distancia y
+            los botones para llamar o ir. Los datos salen de las planillas de
+            turnos de 2026 (en San Luis Capital y Justo Daract, del Ministerio
+            de Salud – Inspección de Farmacias).
+          </p>
+        </AboutSection>
+
+        <AboutSection title="Cómo usarla">
+          <ol className="list-decimal space-y-2 pl-5">
+            <li>
+              <strong className="text-white">Elegí tu ciudad.</strong> Si diste
+              permiso de ubicación, la reconoce sola; si no, tocá una de las
+              tarjetas.
+            </li>
+            <li>
+              <strong className="text-white">Mirá el turno en “Hoy”.</strong>{" "}
+              Con “Consultar fecha” elegís otro día y con “Volver a hoy”
+              regresás.
+            </li>
+            <li>
+              <strong className="text-white">Farmacia más cercana.</strong>{" "}
+              Necesita tu ubicación. Te muestra la más cercana, esté o no de
+              turno, y la de turno más cercana.
+            </li>
+            <li>
+              <strong className="text-white">Usá los botones.</strong> “Ver en
+              el mapa”, “Cómo llegar” (abre Google Maps), “Llamar” y
+              “Compartir”.
+            </li>
+            <li>
+              <strong className="text-white">Calendario.</strong> Mirá el mes
+              completo, tocá un día para ver sus farmacias o buscá una farmacia
+              para saber cuándo le toca.
+            </li>
+          </ol>
+        </AboutSection>
+
+        <AboutSection title="Cómo leer lo que ves">
+          <ul className="space-y-2">
+            {ABOUT_STATUS_GUIDE.map((item) => (
+              <li key={item.key} className="flex flex-wrap items-start gap-2">
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_TONES[item.key]}`}
+                >
+                  {item.label}
+                </span>
+                <span className="min-w-0 flex-1">{item.text}</span>
+              </li>
+            ))}
+          </ul>
+          <p>
+            <strong className="text-white">Grupo (la letra):</strong> las
+            farmacias de un mismo grupo comparten los mismos días de turno.
+          </p>
+          <p>
+            <strong className="text-white">Mapa:</strong> en Villa Mercedes y
+            Justo Daract, el celeste es la farmacia de turno y el gris
+            desvanecido son las 3 más cercanas sin turno. En San Luis Capital se
+            muestran todas.
+          </p>
+          <p>
+            <strong className="text-white">“A 1,2 km aprox.”:</strong> es la
+            distancia en línea recta, no por las calles.
+          </p>
+        </AboutSection>
+
+        <AboutSection title="Cosas a tener en cuenta">
+          <ul className="list-disc space-y-2 pl-5">
+            <li>
+              La posición en el mapa se calcula a partir del nombre o la
+              dirección y puede ser aproximada. Ante la duda, llamá o usá “Cómo
+              llegar”.
+            </li>
+            <li>
+              Una farmacia sin turno puede estar abierta en su horario habitual:
+              no tenemos esos horarios.
+            </li>
+            <li>
+              Es información de referencia. Ante una urgencia médica, no
+              esperes: llamá al servicio de emergencias.
+            </li>
+          </ul>
+        </AboutSection>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-4">
+          <p className="text-xs text-slate-500">
+            Desarrollada por{" "}
+            <a
+              href="https://iored.com.ar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-teal-200 hover:text-teal-100"
+            >
+              IO Red
+            </a>
+          </p>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl bg-teal-300 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
+          >
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function TabBar({ active, onChange }) {
@@ -909,7 +1149,7 @@ function CalendarTab({
         </div>
 
         <p className="mt-4 text-xs leading-5 text-slate-500">
-          {cityId === "villa-mercedes"
+          {GROUP_CITY_DATA[cityId]
             ? "La letra es el grupo de turno de cada día. Tocá un día para ver sus farmacias."
             : "Tocá un día para ver la farmacia de turno."}
         </p>
@@ -966,7 +1206,7 @@ function CalendarTab({
           <div className="mt-5">
             <p className="text-sm font-semibold text-white">
               Próximos turnos de {picked.nombre}
-              {cityId === "villa-mercedes" && picked.grupo
+              {GROUP_CITY_DATA[cityId] && picked.grupo
                 ? ` (grupo ${picked.grupo})`
                 : ""}
             </p>
@@ -1007,6 +1247,7 @@ function App() {
   const [mapTarget, setMapTarget] = useState(null);
   const [positionRequest, setPositionRequest] = useState("idle");
   const [activeTab, setActiveTab] = useState("hoy");
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [selectedDate, setSelectedDate] = useState(getLocalDate);
   const [mappedPharmacies, setMappedPharmacies] = useState([]);
@@ -1094,8 +1335,8 @@ function App() {
     if (selectedCity === "san-luis-capital") {
       return farmaciasSanLuisData.farmacias;
     }
-    if (selectedCity === "villa-mercedes") {
-      return farmaciasVillaMercedesData.farmacias;
+    if (GROUP_CITY_DATA[selectedCity]) {
+      return GROUP_CITY_DATA[selectedCity].farmacias;
     }
     return [];
   }, [selectedCity]);
@@ -1135,7 +1376,7 @@ function App() {
   // Marcadores visibles. Villa Mercedes: las de turno y, si hay ubicación, las
   // 3 más cercanas sin turno (desvanecidas). San Luis: todas, como antes.
   const visiblePharmacies = useMemo(() => {
-    if (selectedCity !== "villa-mercedes") return mappedPharmacies;
+    if (!GROUP_CITY_DATA[selectedCity]) return mappedPharmacies;
 
     const duty = mappedPharmacies.filter((item) => dutyIds.has(item.id));
     if (!userPosition) return duty;
@@ -1168,7 +1409,7 @@ function App() {
   // Villa Mercedes: sin ubicación de la persona solo se buscan las de turno;
   // con ubicación se buscan todas (hacen falta para calcular las más cercanas).
   const locateList = useMemo(() => {
-    if (selectedCity === "villa-mercedes" && !userPosition) {
+    if (GROUP_CITY_DATA[selectedCity] && !userPosition) {
       return farmaciasToLocate.filter((item) => dutyIds.has(item.id));
     }
     return farmaciasToLocate;
@@ -1200,7 +1441,7 @@ function App() {
       }
 
       const cityCenter = CITIES.find((item) => item.id === selectedCity);
-      const gentle = selectedCity === "villa-mercedes";
+      const gentle = Boolean(GROUP_CITY_DATA[selectedCity]);
       const located = [];
 
       for (const item of locateList) {
@@ -1422,10 +1663,10 @@ function App() {
         : "";
 
     const lines = [
-      ` ${item.nombre}${tag}`,
-      item.direccion ? ` ${item.direccion}, ${cityName}` : ` ${cityName}`,
-      item.telefono ? ` ${item.telefono}` : null,
-      ` ${getDirectionsUrl(item, cityName)}`
+      `💊 ${item.nombre}${tag}`,
+      item.direccion ? `📍 ${item.direccion}, ${cityName}` : `📍 ${cityName}`,
+      item.telefono ? `📞 ${item.telefono}` : null,
+      `🧭 ${getDirectionsUrl(item, cityName)}`
     ].filter(Boolean);
 
     const text = lines.join("\n");
@@ -1489,6 +1730,17 @@ function App() {
             </div>
           </a>
 
+          <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAboutOpen(true)}
+            aria-label="Cómo funciona la app"
+            className="flex items-center gap-2 rounded-full border border-teal-300/25 bg-teal-300/[0.07] px-3 py-2 text-[11px] font-semibold text-teal-100 transition hover:bg-teal-300/15"
+          >
+            <Info size={15} />
+            <span className="hidden sm:inline">Cómo funciona</span>
+          </button>
+
           <div className="flex items-center gap-2 rounded-full border border-white/[0.09] bg-white/[0.035] px-3 py-2">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-300 opacity-50" />
@@ -1497,6 +1749,7 @@ function App() {
             <span className="text-[11px] font-medium text-slate-300">
               Servicio gratuito
             </span>
+          </div>
           </div>
         </header>
 
@@ -1516,8 +1769,8 @@ function App() {
           </h1>
 
           <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-slate-400 sm:text-base sm:leading-7">
-            Encontrá la farmacia de turno más cercana en Villa Mercedes o San
-            Luis Capital, estés donde estés.
+            Encontrá la farmacia de turno más cercana en Villa Mercedes, Justo
+            Daract o San Luis Capital, estés donde estés.
           </p>
         </section>
         ) : (
@@ -1569,7 +1822,7 @@ function App() {
             </div>
 
             {(!city || locationStatus === "manual") && (
-              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {CITIES.map((item) => (
                   <CityCard
                     key={item.id}
@@ -1858,7 +2111,7 @@ function App() {
                     key={mappedPharmacy.id}
                     position={[mappedPharmacy.lat, mappedPharmacy.lng]}
                     icon={
-                      selectedCity === "villa-mercedes" && !dutyIds.has(mappedPharmacy.id)
+                      GROUP_CITY_DATA[selectedCity] && !dutyIds.has(mappedPharmacy.id)
                         ? pharmacyIconMuted
                         : pharmacyIcon
                     }
@@ -2049,6 +2302,7 @@ function App() {
       </div>
 
       <TabBar active={activeTab} onChange={changeTab} />
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </main>
   );
 }
