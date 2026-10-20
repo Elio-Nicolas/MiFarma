@@ -107,6 +107,27 @@ function getLocalDate() {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+// Villa Mercedes: antes de esta hora sigue vigente el turno del día anterior.
+const VM_SHIFT_CHANGE_HOUR = 8;
+
+function getLocalHour() {
+  const hour = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TIMEZONE,
+    hour: "2-digit",
+    hourCycle: "h23"
+  }).format(new Date());
+
+  return Number(hour);
+}
+
+function shiftDate(dateString, days) {
+  const [year, month, day] = dateString.split("-").map(Number);
+
+  return new Date(Date.UTC(year, month - 1, day + days, 12))
+    .toISOString()
+    .slice(0, 10);
+}
+
 function formatDate(dateString) {
   const [year, month, day] = dateString.split("-").map(Number);
 
@@ -160,6 +181,8 @@ function detectCity(position) {
   return matches[0]?.city ?? null;
 }
 
+// Villa Mercedes: el turno sale del calendario (día -> grupo) y del listado de
+// farmacias de cada grupo. Un grupo puede tener 2 o 3 farmacias de turno.
 function getVillaMercedesShift(date) {
   const [year, month, day] = date.split("-");
   const group =
@@ -181,57 +204,9 @@ function getVillaMercedesShift(date) {
   };
 }
 
-// San Luis Capital: 15 grupos (A-O) que rotan un grupo por día.
-// El 1 de enero de 2026 corresponde al grupo A.
-const SAN_LUIS_GROUP_CYCLE = "ABCDEFGHIJKLMNO".split("");
-
-function getSanLuisGroup(date) {
-  // 1) Calendario oficial cargado en el JSON ("YYYY-MM-DD": "grupo").
-  const listed = farmaciasSanLuisData.calendario?.[date];
-  if (listed) return listed;
-
-  // 2) Si el día no figura en el calendario, se calcula con la misma
-  //    rotación diaria que sigue el resto del calendario del año.
-  const [year, month, day] = date.split("-").map(Number);
-  if (year !== farmaciasSanLuisData.anio) return null;
-
-  const dayIndex = Math.round(
-    (Date.UTC(year, month - 1, day) - Date.UTC(year, 0, 1)) / 86400000
-  );
-  const cycleLength = SAN_LUIS_GROUP_CYCLE.length;
-
-  return SAN_LUIS_GROUP_CYCLE[
-    ((dayIndex % cycleLength) + cycleLength) % cycleLength
-  ];
-}
-
-function getSanLuisShift(date) {
-  const group = getSanLuisGroup(date);
-  if (!group) return null;
-
-  const delGrupo = farmaciasSanLuisData.grupos?.[group];
-  if (!delGrupo?.length) return null;
-
-  // Las farmacias permanentes están de turno todos los días.
-  const permanentes = farmaciasSanLuisData.permanentes ?? [];
-
-  const horarioTurno = farmaciasSanLuisData.horarioTurno;
-
-  return {
-    grupo: group,
-    farmacias: [...delGrupo, ...permanentes],
-    horario: horarioTurno ? { detalle: horarioTurno } : null
-  };
-}
-
 function getShift(cityId, date) {
   if (cityId === "villa-mercedes") {
     const groupShift = getVillaMercedesShift(date);
-    if (groupShift) return groupShift;
-  }
-
-  if (cityId === "san-luis-capital") {
-    const groupShift = getSanLuisShift(date);
     if (groupShift) return groupShift;
   }
 
@@ -254,13 +229,6 @@ function getDirectionsUrl(item, cityName) {
   )}`;
 }
 
-// Algunas farmacias traen dos teléfonos ("123 / 456" o "123 - 456"):
-// el enlace de llamada usa el primero y sin espacios.
-function getPhoneHref(telefono) {
-  const first = String(telefono).split(/[\/-]/)[0].replace(/\s+/g, "");
-  return `tel:${first}`;
-}
-
 function MapRecenter({ center }) {
   const map = useMap();
 
@@ -270,6 +238,29 @@ function MapRecenter({ center }) {
       map.setView(center, map.getZoom(), { animate: true });
     }
   }, [center, map]);
+
+  return null;
+}
+
+// Al tocar una farmacia de la lista, el mapa vuela hasta ella y abre su popup.
+function MapFocus({ target, markerRefs }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!target) return undefined;
+
+    const openPopup = () => markerRefs.current[target.id]?.openPopup();
+
+    map.once("moveend", openPopup);
+    // Respaldo por si el mapa ya estaba ahí y no dispara "moveend".
+    const timer = setTimeout(openPopup, 1000);
+    map.flyTo(target.position, Math.max(map.getZoom(), 16), { duration: 0.8 });
+
+    return () => {
+      clearTimeout(timer);
+      map.off("moveend", openPopup);
+    };
+  }, [target, map, markerRefs]);
 
   return null;
 }
@@ -315,8 +306,39 @@ function CityCard({ city, selected, onClick }) {
   );
 }
 
-// Turno por grupo (Villa Mercedes y San Luis Capital): lista de farmacias de turno.
-function GroupShiftCard({ shift, cityName }) {
+function formatDistance(km) {
+  if (km < 1) return `${Math.round(km * 1000)} m`;
+  return `${km.toFixed(1).replace(".", ",")} km`;
+}
+
+// Turno por grupo (Villa Mercedes): lista de farmacias de turno.
+function GroupShiftCard({
+  shift,
+  cityName,
+  located,
+  userPosition,
+  geocodingStatus,
+  onShowOnMap
+}) {
+  // Si hay ubicación del usuario, la más cercana va primero.
+  const items = useMemo(() => {
+    const rows = shift.farmacias.map((item) => {
+      const spot = located.find((point) => point.id === item.id);
+      return {
+        item,
+        isLocated: Boolean(spot),
+        distance: spot && userPosition ? distanceKm(userPosition, spot) : null
+      };
+    });
+
+    return rows.sort((a, b) => {
+      if (a.distance === null && b.distance === null) return 0;
+      if (a.distance === null) return 1;
+      if (b.distance === null) return -1;
+      return a.distance - b.distance;
+    });
+  }, [shift, located, userPosition]);
+
   return (
     <div className="overflow-hidden rounded-[28px] border border-teal-200/15 bg-gradient-to-br from-teal-300/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
       <div className="flex items-start gap-4">
@@ -355,12 +377,19 @@ function GroupShiftCard({ shift, cityName }) {
       )}
 
       <ul className="mt-5 space-y-3">
-        {shift.farmacias.map((item) => (
+        {items.map(({ item, isLocated, distance }) => (
           <li
             key={item.id}
             className="rounded-2xl border border-white/[0.07] bg-black/10 p-4"
           >
-            <p className="font-semibold text-white">{item.nombre}</p>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <p className="font-semibold text-white">{item.nombre}</p>
+              {distance !== null && (
+                <span className="rounded-full bg-blue-400/10 px-2.5 py-1 text-[11px] font-medium text-blue-200">
+                  a {formatDistance(distance)} aprox.
+                </span>
+              )}
+            </div>
 
             {item.direccion && (
               <p className="mt-1.5 flex items-start gap-2 text-sm leading-6 text-slate-300">
@@ -369,12 +398,26 @@ function GroupShiftCard({ shift, cityName }) {
               </p>
             )}
 
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onShowOnMap(item)}
+                disabled={!isLocated}
+                className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-teal-300/30 bg-teal-300/10 px-4 py-2.5 text-sm font-semibold text-teal-100 transition hover:bg-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <MapPinned size={16} />
+                {isLocated
+                  ? "Ver en el mapa"
+                  : geocodingStatus === "done"
+                    ? "Sin ubicación"
+                    : "Ubicando…"}
+              </button>
+
               <a
                 href={getDirectionsUrl(item, cityName)}
                 target="_blank"
                 rel="noreferrer"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
+                className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
               >
                 <Navigation size={16} />
                 Cómo llegar
@@ -382,8 +425,8 @@ function GroupShiftCard({ shift, cityName }) {
 
               {item.telefono && (
                 <a
-                  href={getPhoneHref(item.telefono)}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                  href={`tel:${item.telefono}`}
+                  className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
                 >
                   <Phone size={16} />
                   Llamar
@@ -403,6 +446,9 @@ function App() {
   const [locationStatus, setLocationStatus] = useState("loading");
   const [locationMessage, setLocationMessage] = useState("");
   const manualSelectionRef = useRef(false);
+  const mapBoxRef = useRef(null);
+  const markerRefs = useRef({});
+  const [mapTarget, setMapTarget] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const [selectedDate, setSelectedDate] = useState(getLocalDate);
   const [mappedPharmacies, setMappedPharmacies] = useState([]);
@@ -470,12 +516,23 @@ function App() {
 
   const city = CITIES.find((item) => item.id === selectedCity) ?? null;
 
+  const usingPreviousDayShift =
+    selectedCity === "villa-mercedes" &&
+    selectedDate === today &&
+    getLocalHour() < VM_SHIFT_CHANGE_HOUR;
+
+  const effectiveDate = usingPreviousDayShift
+    ? shiftDate(selectedDate, -1)
+    : selectedDate;
+
   const shift = useMemo(
-    () => (selectedCity ? getShift(selectedCity, selectedDate) : null),
-    [selectedCity, selectedDate]
+    () => (selectedCity ? getShift(selectedCity, effectiveDate) : null),
+    [selectedCity, effectiveDate]
   );
 
-  
+  // Farmacias a ubicar en el mapa:
+  // - San Luis Capital: todas las del listado.
+  // - Villa Mercedes: solo las del grupo de turno de la fecha elegida.
   const farmaciasToLocate = useMemo(() => {
     if (selectedCity === "san-luis-capital") {
       return farmaciasSanLuisData.farmacias;
@@ -607,6 +664,14 @@ function App() {
     setSelectedCity(cityId);
     setLocationStatus("manual-selected");
     setLocationMessage(`Ciudad seleccionada: ${CITIES.find((item) => item.id === cityId)?.name ?? ""}`);
+  }
+
+  function showOnMap(item) {
+    const spot = mappedPharmacies.find((point) => point.id === item.id);
+    if (!spot) return;
+
+    setMapTarget({ id: spot.id, position: [spot.lat, spot.lng], nonce: Date.now() });
+    mapBoxRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function retryLocation() {
@@ -801,8 +866,22 @@ function App() {
               </div>
             </div>
 
+            {usingPreviousDayShift && (
+              <p className="mb-3 rounded-2xl border border-amber-300/20 bg-amber-300/[0.07] px-4 py-3 text-xs leading-5 text-amber-100">
+                Todavía no son las {VM_SHIFT_CHANGE_HOUR}:00, por eso sigue vigente
+                el turno de ayer ({formatDate(effectiveDate)}).
+              </p>
+            )}
+
             {shift?.farmacias ? (
-              <GroupShiftCard shift={shift} cityName={city.name} />
+              <GroupShiftCard
+                shift={shift}
+                cityName={city.name}
+                located={mappedPharmacies}
+                userPosition={userPosition}
+                geocodingStatus={geocodingStatus}
+                onShowOnMap={showOnMap}
+              />
             ) : shift ? (
               <div className="overflow-hidden rounded-[28px] border border-teal-200/15 bg-gradient-to-br from-teal-300/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
                 <div className="flex items-start gap-4">
@@ -920,7 +999,10 @@ function App() {
               </span>
             </div>
 
-            <div className="relative h-[310px] overflow-hidden rounded-[28px] border border-white/[0.09] bg-[#111c2c] sm:h-[380px]">
+            <div
+              ref={mapBoxRef}
+              className="relative h-[310px] overflow-hidden rounded-[28px] border border-white/[0.09] bg-[#111c2c] sm:h-[380px]"
+            >
 
               <a
                 href="https://iored.com.ar/"
@@ -945,6 +1027,7 @@ function App() {
                 <ZoomControl position="bottomleft" />
 
                 <MapRecenter center={mapCenter} />
+                <MapFocus target={mapTarget} markerRefs={markerRefs} />
 
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -956,6 +1039,9 @@ function App() {
                     key={mappedPharmacy.id}
                     position={[mappedPharmacy.lat, mappedPharmacy.lng]}
                     icon={pharmacyIcon}
+                    ref={(marker) => {
+                      if (marker) markerRefs.current[mappedPharmacy.id] = marker;
+                    }}
                   >
                     <Popup>
                       <strong>{mappedPharmacy.nombre}</strong>
