@@ -20,6 +20,7 @@ import {
   Navigation,
   Phone,
   RefreshCw,
+  Share2,
   ShieldCheck,
   Sparkles
 } from "lucide-react";
@@ -57,7 +58,7 @@ const GEOCODING_CONFIG = {
     maxDistanceKm: 25
   },
   "villa-mercedes": {
-    cacheKey: "farmacias-vm-geocoding-v1",
+    cacheKey: "farmacias-vm-geocoding-v2",
     localidad: "Villa Mercedes, San Luis",
     maxDistanceKm: 15
   }
@@ -77,6 +78,21 @@ const pharmacyIcon = L.divIcon({
   iconSize: [42, 42],
   iconAnchor: [21, 21],
   popupAnchor: [0, -20]
+});
+
+const pharmacyIconMuted = L.divIcon({
+  className: "pharmacy-marker",
+  html: `
+    <div style="
+      width:34px;height:34px;border-radius:13px;
+      display:flex;align-items:center;justify-content:center;
+      background:#64748b;border:3px solid #cbd5e1;
+      color:#0f172a;font-size:18px;opacity:.85;
+    ">✚</div>
+  `,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+  popupAnchor: [0, -16]
 });
 
 const userIcon = L.divIcon({
@@ -179,6 +195,40 @@ function detectCity(position) {
     .sort((a, b) => a.distance - b.distance);
 
   return matches[0]?.city ?? null;
+}
+
+function normalizeText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const NAME_STOPWORDS = new Set([
+  "farmacia", "farmacias", "suc", "sucursal", "del", "de", "la", "las", "los", "san", "santa"
+]);
+
+function nameTokens(value) {
+  return normalizeText(value)
+    .split(" ")
+    .filter((token) => token.length > 2 && !NAME_STOPWORDS.has(token));
+}
+
+// Para farmacias sin dirección: acepta solo resultados que sean farmacias y
+// compartan alguna palabra significativa con el nombre buscado.
+function matchesPharmacyName(feature, item) {
+  const props = feature?.properties ?? {};
+  if (props.osm_value !== "pharmacy") return false;
+
+  const found = nameTokens(props.name);
+  return nameTokens(item.nombre).some((token) => found.includes(token));
+}
+
+function getTelHref(phone) {
+  const first = String(phone).split(/[-/]/)[0].replace(/[^\d+]/g, "");
+  return `tel:${first}`;
 }
 
 // Villa Mercedes: el turno sale del calendario (día -> grupo) y del listado de
@@ -306,6 +356,205 @@ function CityCard({ city, selected, onClick }) {
   );
 }
 
+const STATUS_TONES = {
+  turno: "bg-teal-300/10 text-teal-200",
+  "24h": "bg-teal-300/10 text-teal-200",
+  "sin-turno": "bg-amber-300/10 text-amber-200",
+  desconocido: "bg-white/[0.07] text-slate-300"
+};
+
+function NearestRow({ title, entry, status, cityName, onShowOnMap, onShare }) {
+  const { item, distance } = entry;
+
+  return (
+    <div className="rounded-2xl border border-white/[0.07] bg-black/10 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-semibold text-slate-400">{title}</p>
+        <span
+          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_TONES[status.key]}`}
+        >
+          {status.label}
+        </span>
+      </div>
+
+      <p className="mt-2 text-lg font-semibold text-white">{item.nombre}</p>
+      <p className="mt-1 text-sm text-slate-400">
+        A {formatDistance(distance)} aprox., en línea recta
+      </p>
+
+      {item.direccion && (
+        <p className="mt-1 flex items-start gap-2 text-sm leading-6 text-slate-300">
+          <MapPin size={15} className="mt-1 shrink-0 text-teal-200" />
+          {item.direccion}
+        </p>
+      )}
+
+      {status.key === "sin-turno" && (
+        <p className="mt-2 text-xs leading-5 text-amber-200/90">
+          No está de turno, así que puede estar cerrada. Llamá antes de ir.
+        </p>
+      )}
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a
+          href={getDirectionsUrl(item, cityName)}
+          target="_blank"
+          rel="noreferrer"
+          className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
+        >
+          <Navigation size={16} />
+          Cómo llegar
+        </a>
+
+        <button
+          type="button"
+          onClick={() => onShowOnMap(item)}
+          className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-teal-300/30 bg-teal-300/10 px-4 py-2.5 text-sm font-semibold text-teal-100 transition hover:bg-teal-300/20"
+        >
+          <MapPinned size={16} />
+          Ver en el mapa
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onShare(item, status)}
+          className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+        >
+          <Share2 size={16} />
+          Compartir
+        </button>
+
+        {item.telefono && (
+          <a
+            href={getTelHref(item.telefono)}
+            className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+          >
+            <Phone size={16} />
+            Llamar
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Farmacia más cercana a la persona, esté o no de turno.
+function NearestCard({
+  cityName,
+  userPosition,
+  locationStatus,
+  positionRequest,
+  geocodingStatus,
+  locatedCount,
+  totalCount,
+  nearby,
+  getStatus,
+  onRetryLocation,
+  onShowOnMap,
+  onShare
+}) {
+  let content;
+
+  if (!userPosition) {
+    const searching = locationStatus === "loading" || positionRequest === "loading";
+
+    content = searching ? (
+      <p className="text-sm leading-6 text-slate-400">Buscando tu ubicación…</p>
+    ) : (
+      <div>
+        <p className="text-sm leading-6 text-slate-400">
+          {positionRequest === "error"
+            ? "No pudimos obtener tu ubicación. Revisá que el permiso esté activado en el navegador."
+            : "Necesitamos tu ubicación para decirte cuál es la farmacia más cercana."}
+        </p>
+        <button
+          type="button"
+          onClick={onRetryLocation}
+          className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-teal-300 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
+        >
+          <LocateFixed size={16} />
+          Usar mi ubicación
+        </button>
+      </div>
+    );
+  } else if (!nearby) {
+    content = (
+      <p className="text-sm leading-6 text-slate-400">
+        {geocodingStatus === "done"
+          ? "No pudimos ubicar farmacias para calcular la más cercana."
+          : `Ubicando farmacias… ${locatedCount} de ${totalCount}.`}
+      </p>
+    );
+  } else if (nearby.nearest.distance > 40) {
+    content = (
+      <p className="text-sm leading-6 text-slate-400">
+        Parece que no estás en {cityName}: la farmacia más cercana que conocemos
+        queda a {formatDistance(nearby.nearest.distance)}.
+      </p>
+    );
+  } else {
+    const nearestStatus = getStatus(nearby.nearest.item);
+    const sameAsOpen = nearby.nearestOpen?.item.id === nearby.nearest.item.id;
+
+    const nearestTitle = sameAsOpen
+      ? nearestStatus.key === "24h"
+        ? "La más cercana, y abre las 24 h"
+        : "La más cercana, y está de turno"
+      : "La más cercana";
+
+    content = (
+      <div className="space-y-3">
+        <NearestRow
+          title={nearestTitle}
+          entry={nearby.nearest}
+          status={nearestStatus}
+          cityName={cityName}
+          onShowOnMap={onShowOnMap}
+          onShare={onShare}
+        />
+
+        {nearby.nearestOpen && !sameAsOpen && (
+          <NearestRow
+            title="La de turno más cercana"
+            entry={nearby.nearestOpen}
+            status={getStatus(nearby.nearestOpen.item)}
+            cityName={cityName}
+            onShowOnMap={onShowOnMap}
+            onShare={onShare}
+          />
+        )}
+
+        {geocodingStatus === "loading" && (
+          <p className="text-xs leading-5 text-slate-500">
+            Seguimos ubicando farmacias ({locatedCount} de {totalCount}); puede
+            aparecer una más cercana.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-[28px] border border-blue-300/20 bg-gradient-to-br from-blue-400/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-400/10 text-blue-200">
+          <MapPinned size={21} />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-white">
+            Farmacia más cercana
+          </h2>
+          <p className="mt-0.5 text-sm text-slate-400">
+            Cualquier día y hora, esté o no de turno.
+          </p>
+        </div>
+      </div>
+
+      {content}
+    </div>
+  );
+}
+
 function formatDistance(km) {
   if (km < 1) return `${Math.round(km * 1000)} m`;
   return `${km.toFixed(1).replace(".", ",")} km`;
@@ -318,7 +567,8 @@ function GroupShiftCard({
   located,
   userPosition,
   geocodingStatus,
-  onShowOnMap
+  onShowOnMap,
+  onShare
 }) {
   // Si hay ubicación del usuario, la más cercana va primero.
   const items = useMemo(() => {
@@ -423,9 +673,18 @@ function GroupShiftCard({
                 Cómo llegar
               </a>
 
+              <button
+                type="button"
+                onClick={() => onShare(item)}
+                className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+              >
+                <Share2 size={16} />
+                Compartir
+              </button>
+
               {item.telefono && (
                 <a
-                  href={`tel:${item.telefono}`}
+                  href={getTelHref(item.telefono)}
                   className="flex min-h-11 min-w-[9rem] flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
                 >
                   <Phone size={16} />
@@ -449,6 +708,7 @@ function App() {
   const mapBoxRef = useRef(null);
   const markerRefs = useRef({});
   const [mapTarget, setMapTarget] = useState(null);
+  const [positionRequest, setPositionRequest] = useState("idle");
   const [retryCount, setRetryCount] = useState(0);
   const [selectedDate, setSelectedDate] = useState(getLocalDate);
   const [mappedPharmacies, setMappedPharmacies] = useState([]);
@@ -530,18 +790,64 @@ function App() {
     [selectedCity, effectiveDate]
   );
 
-  // Farmacias a ubicar en el mapa:
-  // - San Luis Capital: todas las del listado.
-  // - Villa Mercedes: solo las del grupo de turno de la fecha elegida.
+  // Todas las farmacias de la ciudad se ubican en el mapa: hacen falta para
+  // calcular la más cercana, esté o no de turno.
   const farmaciasToLocate = useMemo(() => {
     if (selectedCity === "san-luis-capital") {
       return farmaciasSanLuisData.farmacias;
     }
     if (selectedCity === "villa-mercedes") {
-      return shift?.farmacias ?? [];
+      return farmaciasVillaMercedesData.farmacias;
     }
     return [];
-  }, [selectedCity, shift]);
+  }, [selectedCity]);
+
+  const dayWord = selectedDate === today ? "hoy" : "ese día";
+
+  // Ids de las farmacias de turno en la fecha consultada.
+  // Villa Mercedes: sale del calendario. San Luis: se compara el nombre del
+  // turno cargado con el listado (si no coincide, el estado queda "desconocido").
+  const dutyIds = useMemo(() => {
+    if (!shift) return new Set();
+    if (shift.farmacias) return new Set(shift.farmacias.map((item) => item.id));
+
+    const target = normalizeText(shift.farmacia?.nombre);
+    if (!target) return new Set();
+
+    return new Set(
+      farmaciasToLocate
+        .filter((item) => {
+          const name = normalizeText(item.nombre);
+          return name && (name === target || `farmacia ${name}` === target);
+        })
+        .map((item) => item.id)
+    );
+  }, [shift, farmaciasToLocate]);
+
+  function getStatus(item) {
+    if (item.permanente) return { key: "24h", label: "Abierta 24 h" };
+    if (dutyIds.size === 0) {
+      return { key: "desconocido", label: "Confirmá el horario llamando" };
+    }
+    return dutyIds.has(item.id)
+      ? { key: "turno", label: `De turno ${dayWord}` }
+      : { key: "sin-turno", label: `Sin turno ${dayWord}` };
+  }
+
+  // La más cercana a la persona (de turno o no) y la de turno más cercana.
+  const nearby = useMemo(() => {
+    if (!userPosition || mappedPharmacies.length === 0) return null;
+
+    const ranked = mappedPharmacies
+      .map((item) => ({ item, distance: distanceKm(userPosition, item) }))
+      .sort((a, b) => a.distance - b.distance);
+
+    return {
+      nearest: ranked[0],
+      nearestOpen:
+        ranked.find(({ item }) => item.permanente || dutyIds.has(item.id)) ?? null
+    };
+  }, [userPosition, mappedPharmacies, dutyIds]);
 
   useEffect(() => {
     const config = GEOCODING_CONFIG[selectedCity];
@@ -594,11 +900,16 @@ function App() {
             .filter(Boolean)
             .join(", ");
           try {
-            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1&lat=${cityCenter.lat}&lon=${cityCenter.lng}`;
+            const byName = !item.direccion;
+            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=${byName ? 5 : 1}&lat=${cityCenter.lat}&lon=${cityCenter.lng}`;
             const response = await fetch(url);
             if (!response.ok) return null;
             const result = await response.json();
-            const coordinates = result.features?.[0]?.geometry?.coordinates;
+            const features = result.features ?? [];
+            const feature = byName
+              ? features.find((candidate) => matchesPharmacyName(candidate, item))
+              : features[0];
+            const coordinates = feature?.geometry?.coordinates;
             if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
             const candidate = { lng: coordinates[0], lat: coordinates[1] };
             if (distanceKm(candidate, cityCenter) > config.maxDistanceKm) return null;
@@ -656,14 +967,67 @@ function App() {
       ? getDirectionsUrl(pharmacy, city?.name)
       : null;
 
-  const locatedLabel =
-    selectedCity === "villa-mercedes" ? "farmacias de turno" : "farmacias";
+  const locatedLabel = "farmacias";
 
   function chooseCity(cityId) {
     manualSelectionRef.current = true;
     setSelectedCity(cityId);
     setLocationStatus("manual-selected");
     setLocationMessage(`Ciudad seleccionada: ${CITIES.find((item) => item.id === cityId)?.name ?? ""}`);
+  }
+
+  function refreshUserPosition() {
+    if (!navigator.geolocation) {
+      setPositionRequest("error");
+      return;
+    }
+
+    setPositionRequest("loading");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserPosition({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setPositionRequest("idle");
+      },
+      () => setPositionRequest("error"),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  }
+
+  async function shareFarmacia(item, status) {
+    const cityName = city?.name ?? "San Luis";
+    const tag =
+      status && (status.key === "turno" || status.key === "24h")
+        ? ` (${status.label})`
+        : "";
+
+    const lines = [
+      `💊 ${item.nombre}${tag}`,
+      item.direccion ? `📍 ${item.direccion}, ${cityName}` : `📍 ${cityName}`,
+      item.telefono ? `📞 ${item.telefono}` : null,
+      `🧭 ${getDirectionsUrl(item, cityName)}`
+    ].filter(Boolean);
+
+    const text = lines.join("\n");
+    const url = `${window.location.origin}${window.location.pathname}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Farmacia ${item.nombre}`, text, url });
+      } catch {
+        // La persona canceló el menú de compartir.
+      }
+      return;
+    }
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   function showOnMap(item) {
@@ -827,6 +1191,25 @@ function App() {
 
         {city && (
           <section className="mx-auto mt-6 max-w-3xl">
+            <NearestCard
+              cityName={city.name}
+              userPosition={userPosition}
+              locationStatus={locationStatus}
+              positionRequest={positionRequest}
+              geocodingStatus={geocodingStatus}
+              locatedCount={mappedPharmacies.length}
+              totalCount={farmaciasToLocate.length}
+              nearby={nearby}
+              getStatus={getStatus}
+              onRetryLocation={refreshUserPosition}
+              onShowOnMap={showOnMap}
+              onShare={shareFarmacia}
+            />
+          </section>
+        )}
+
+        {city && (
+          <section className="mx-auto mt-6 max-w-3xl">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-200/80">
@@ -881,6 +1264,7 @@ function App() {
                 userPosition={userPosition}
                 geocodingStatus={geocodingStatus}
                 onShowOnMap={showOnMap}
+                onShare={(item) => shareFarmacia(item, getStatus(item))}
               />
             ) : shift ? (
               <div className="overflow-hidden rounded-[28px] border border-teal-200/15 bg-gradient-to-br from-teal-300/[0.09] via-white/[0.035] to-white/[0.02] p-5 sm:p-6">
@@ -939,13 +1323,27 @@ function App() {
 
                   {pharmacy.telefono && (
                     <a
-                      href={`tel:${pharmacy.telefono}`}
+                      href={getTelHref(pharmacy.telefono)}
                       className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
                     >
                       <Phone size={17} />
                       Llamar a la farmacia
                     </a>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      shareFarmacia(pharmacy, {
+                        key: "turno",
+                        label: `De turno ${dayWord}`
+                      })
+                    }
+                    className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08] sm:col-span-2"
+                  >
+                    <Share2 size={17} />
+                    Compartir esta farmacia
+                  </button>
                 </div>
               </div>
             ) : (
@@ -1038,7 +1436,11 @@ function App() {
                   <Marker
                     key={mappedPharmacy.id}
                     position={[mappedPharmacy.lat, mappedPharmacy.lng]}
-                    icon={pharmacyIcon}
+                    icon={
+                      selectedCity === "villa-mercedes" && !dutyIds.has(mappedPharmacy.id)
+                        ? pharmacyIconMuted
+                        : pharmacyIcon
+                    }
                     ref={(marker) => {
                       if (marker) markerRefs.current[mappedPharmacy.id] = marker;
                     }}
@@ -1054,7 +1456,9 @@ function App() {
                       )}
                       {mappedPharmacy.permanente
                         ? "Turno permanente"
-                        : `Grupo de turno ${mappedPharmacy.grupo}`}
+                        : dutyIds.has(mappedPharmacy.id)
+                          ? `De turno ${dayWord} · Grupo ${mappedPharmacy.grupo}`
+                          : `Grupo de turno ${mappedPharmacy.grupo}`}
                       <br />
                       <a
                         href={getDirectionsUrl(mappedPharmacy, city.name)}
