@@ -11,7 +11,10 @@ import L from "leaflet";
 import {
   ArrowDownRight,
   ArrowRight,
+  CalendarDays,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Cross,
   LocateFixed,
@@ -699,6 +702,300 @@ function GroupShiftCard({
   );
 }
 
+const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
+
+function monthTitle(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const text = new Intl.DateTimeFormat("es-AR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(Date.UTC(year, month - 1, 1, 12)));
+
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function shiftMonth(monthKey, delta) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + delta, 1, 12));
+
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function formatShortDate(dateString) {
+  const [year, month, day] = dateString.split("-").map(Number);
+
+  return new Intl.DateTimeFormat("es-AR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC"
+  }).format(new Date(Date.UTC(year, month - 1, day, 12)));
+}
+
+// Próximas fechas de turno de una farmacia (desde la fecha dada).
+function getUpcomingTurns(cityId, item, fromDate, limit = 8) {
+  const dates = [];
+
+  if (cityId === "villa-mercedes" && item.grupo) {
+    const calendar = farmaciasVillaMercedesData.calendario ?? {};
+
+    for (const [monthKey, days] of Object.entries(calendar)) {
+      for (const [day, group] of Object.entries(days)) {
+        if (group === item.grupo) {
+          dates.push(`${monthKey}-${day.padStart(2, "0")}`);
+        }
+      }
+    }
+  } else {
+    const target = normalizeText(item.nombre);
+    const turnos = turnosData.ciudades?.[cityId]?.turnos ?? {};
+
+    for (const [date, shift] of Object.entries(turnos)) {
+      const name = normalizeText(shift?.farmacia?.nombre);
+      if (name && (name === target || name === `farmacia ${target}`)) {
+        dates.push(date);
+      }
+    }
+  }
+
+  return dates.filter((date) => date >= fromDate).sort().slice(0, limit);
+}
+
+function TabBar({ active, onChange }) {
+  const tabs = [
+    { id: "hoy", label: "Hoy", Icon: Cross },
+    { id: "calendario", label: "Calendario", Icon: CalendarDays }
+  ];
+
+  return (
+    <nav
+      aria-label="Secciones"
+      className="fixed inset-x-0 bottom-0 z-[2000] border-t border-white/10 bg-[#08111f]/95 backdrop-blur-xl"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      <div className="mx-auto flex max-w-3xl">
+        {tabs.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onChange(id)}
+            aria-current={active === id ? "page" : undefined}
+            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition ${
+              active === id
+                ? "text-teal-200"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Icon size={20} />
+            {label}
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+function CalendarTab({
+  cityId,
+  cityName,
+  selectedDate,
+  today,
+  farmacias,
+  onPickDate
+}) {
+  const [monthKey, setMonthKey] = useState(selectedDate.slice(0, 7));
+  const [query, setQuery] = useState("");
+  const [picked, setPicked] = useState(null);
+
+  const [year, month] = monthKey.split("-").map(Number);
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  // La semana arranca en lunes.
+  const offset = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+
+  const cells = [];
+  for (let index = 0; index < offset; index += 1) cells.push(null);
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = `${monthKey}-${String(day).padStart(2, "0")}`;
+    const shift = getShift(cityId, date);
+
+    cells.push({
+      day,
+      date,
+      label: shift?.grupo ?? shift?.farmacia?.nombre?.split(" ")[0] ?? null
+    });
+  }
+
+  const matches = useMemo(() => {
+    const text = normalizeText(query);
+    if (text.length < 2 || picked) return [];
+
+    return farmacias
+      .filter((item) => normalizeText(item.nombre).includes(text))
+      .slice(0, 6);
+  }, [query, picked, farmacias]);
+
+  const turns = useMemo(
+    () => (picked ? getUpcomingTurns(cityId, picked, today) : []),
+    [picked, cityId, today]
+  );
+
+  return (
+    <section className="mx-auto mt-6 max-w-3xl space-y-6">
+      <div className="rounded-[28px] border border-white/[0.09] bg-white/[0.035] p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            aria-label="Mes anterior"
+            onClick={() => setMonthKey(shiftMonth(monthKey, -1))}
+            className="rounded-xl p-2 text-slate-300 transition hover:bg-white/[0.07]"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-white">
+              {monthTitle(monthKey)}
+            </h2>
+            <p className="text-xs text-slate-500">{cityName}</p>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Mes siguiente"
+            onClick={() => setMonthKey(shiftMonth(monthKey, 1))}
+            className="rounded-xl p-2 text-slate-300 transition hover:bg-white/[0.07]"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
+          {WEEKDAYS.map((weekday, index) => (
+            <span
+              key={index}
+              className="py-1 text-[11px] font-semibold text-slate-500"
+            >
+              {weekday}
+            </span>
+          ))}
+
+          {cells.map((cell, index) =>
+            cell ? (
+              <button
+                key={cell.date}
+                type="button"
+                onClick={() => onPickDate(cell.date)}
+                aria-label={`${cell.day}${cell.label ? `, ${cell.label}` : ""}`}
+                className={`flex aspect-square flex-col items-center justify-center rounded-xl border text-sm transition ${
+                  cell.date === selectedDate
+                    ? "border-teal-300/70 bg-teal-300/15 text-white"
+                    : cell.date === today
+                      ? "border-blue-300/50 bg-white/[0.03] text-white"
+                      : "border-white/[0.06] bg-white/[0.03] text-slate-200 hover:bg-white/[0.08]"
+                } ${cell.label ? "" : "opacity-50"}`}
+              >
+                <span>{cell.day}</span>
+                {cell.label && (
+                  <span className="mt-0.5 max-w-full truncate px-0.5 text-[10px] font-bold text-teal-200">
+                    {cell.label}
+                  </span>
+                )}
+              </button>
+            ) : (
+              <span key={`empty-${index}`} />
+            )
+          )}
+        </div>
+
+        <p className="mt-4 text-xs leading-5 text-slate-500">
+          {cityId === "villa-mercedes"
+            ? "La letra es el grupo de turno de cada día. Tocá un día para ver sus farmacias."
+            : "Tocá un día para ver la farmacia de turno."}
+        </p>
+      </div>
+
+      <div className="rounded-[28px] border border-white/[0.09] bg-white/[0.035] p-5 sm:p-6">
+        <h2 className="text-lg font-semibold text-white">
+          ¿Cuándo le toca a tu farmacia?
+        </h2>
+        <p className="mt-1 text-sm text-slate-400">
+          Buscala por nombre y mirá sus próximos turnos.
+        </p>
+
+        <label htmlFor="pharmacy-search" className="sr-only">
+          Nombre de la farmacia
+        </label>
+        <input
+          id="pharmacy-search"
+          type="search"
+          value={picked ? picked.nombre : query}
+          onChange={(event) => {
+            setPicked(null);
+            setQuery(event.target.value);
+          }}
+          placeholder="Por ejemplo: Del Aguila"
+          className="mt-4 w-full rounded-xl border border-white/10 bg-[#0b1727] px-3 py-3 text-sm text-white outline-none transition focus:border-teal-300/60"
+        />
+
+        {matches.length > 0 && (
+          <ul className="mt-2 divide-y divide-white/[0.06] overflow-hidden rounded-xl border border-white/[0.08] bg-[#0b1727]">
+            {matches.map((item) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPicked(item);
+                    setQuery(item.nombre);
+                  }}
+                  className="w-full px-3 py-3 text-left text-sm text-slate-200 transition hover:bg-white/[0.06]"
+                >
+                  {item.nombre}
+                  {item.direccion && (
+                    <span className="block text-xs text-slate-500">
+                      {item.direccion}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {picked && (
+          <div className="mt-5">
+            <p className="text-sm font-semibold text-white">
+              Próximos turnos de {picked.nombre}
+              {cityId === "villa-mercedes" && picked.grupo
+                ? ` (grupo ${picked.grupo})`
+                : ""}
+            </p>
+
+            {turns.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {turns.map((date) => (
+                  <button
+                    key={date}
+                    type="button"
+                    onClick={() => onPickDate(date)}
+                    className="rounded-full border border-teal-300/30 bg-teal-300/10 px-3 py-1.5 text-xs font-semibold capitalize text-teal-100 transition hover:bg-teal-300/20"
+                  >
+                    {formatShortDate(date)}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                No encontramos turnos cargados para esta farmacia desde hoy.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function App() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [userPosition, setUserPosition] = useState(null);
@@ -709,6 +1006,7 @@ function App() {
   const markerRefs = useRef({});
   const [mapTarget, setMapTarget] = useState(null);
   const [positionRequest, setPositionRequest] = useState("idle");
+  const [activeTab, setActiveTab] = useState("hoy");
   const [retryCount, setRetryCount] = useState(0);
   const [selectedDate, setSelectedDate] = useState(getLocalDate);
   const [mappedPharmacies, setMappedPharmacies] = useState([]);
@@ -976,6 +1274,17 @@ function App() {
     setLocationMessage(`Ciudad seleccionada: ${CITIES.find((item) => item.id === cityId)?.name ?? ""}`);
   }
 
+  function changeTab(tab) {
+    setActiveTab(tab);
+    setMapTarget(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function pickDateFromCalendar(date) {
+    setSelectedDate(date);
+    changeTab("hoy");
+  }
+
   function refreshUserPosition() {
     if (!navigator.geolocation) {
       setPositionRequest("error");
@@ -1055,7 +1364,7 @@ function App() {
         className="pointer-events-none absolute right-[-180px] top-[40rem] h-80 w-80 rounded-full bg-blue-500/[0.08] blur-[100px]"
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-5 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-5 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between gap-3">
           <a href="#" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-300 text-slate-950 shadow-lg shadow-teal-300/10">
@@ -1083,6 +1392,7 @@ function App() {
           </div>
         </header>
 
+        {activeTab === "hoy" ? (
         <section className="mx-auto max-w-3xl pb-8 pt-12 text-center sm:pb-10 sm:pt-16">
           <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-teal-300/15 bg-teal-300/[0.07] px-3.5 py-2 text-xs font-medium text-teal-100">
             <Sparkles size={14} />
@@ -1102,6 +1412,9 @@ function App() {
             Luis Capital, estés donde estés.
           </p>
         </section>
+        ) : (
+          <div className="h-6" />
+        )}
 
         <section className="mx-auto max-w-3xl">
           <div className="rounded-[28px] border border-white/[0.09] bg-white/[0.035] p-4 shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-6">
@@ -1189,7 +1502,7 @@ function App() {
           </div>
         </section>
 
-        {city && (
+        {city && activeTab === "hoy" && (
           <section className="mx-auto mt-6 max-w-3xl">
             <NearestCard
               cityName={city.name}
@@ -1208,7 +1521,7 @@ function App() {
           </section>
         )}
 
-        {city && (
+        {city && activeTab === "hoy" && (
           <section className="mx-auto mt-6 max-w-3xl">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
@@ -1378,7 +1691,7 @@ function App() {
           </section>
         )}
 
-        {city && (
+        {city && activeTab === "hoy" && (
           <section className="mx-auto mt-8 max-w-3xl">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
@@ -1521,6 +1834,20 @@ function App() {
           </section>
         )}
 
+        {city && activeTab === "calendario" && (
+          <CalendarTab
+            key={city.id}
+            cityId={city.id}
+            cityName={city.name}
+            selectedDate={selectedDate}
+            today={today}
+            farmacias={farmaciasToLocate}
+            onPickDate={pickDateFromCalendar}
+          />
+        )}
+
+        {activeTab === "hoy" && (
+          <>
         <section className="mx-auto mt-8 max-w-3xl">
           <div className="relative overflow-hidden rounded-[26px] border border-dashed border-white/[0.14] bg-white/[0.02] p-5 sm:p-6">
             <div
@@ -1576,6 +1903,8 @@ function App() {
             </a>
           </div>
         </div>
+          </>
+        )}
 
         <footer className="mx-auto mt-10 max-w-3xl border-t border-white/[0.07] pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1610,6 +1939,8 @@ function App() {
           </p>
         </footer>
       </div>
+
+      <TabBar active={activeTab} onChange={changeTab} />
     </main>
   );
 }
