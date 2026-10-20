@@ -1422,10 +1422,10 @@ function App() {
         : "";
 
     const lines = [
-      `💊 ${item.nombre}${tag}`,
-      item.direccion ? `📍 ${item.direccion}, ${cityName}` : `📍 ${cityName}`,
-      item.telefono ? `📞 ${item.telefono}` : null,
-      `🧭 ${getDirectionsUrl(item, cityName)}`
+      ` ${item.nombre}${tag}`,
+      item.direccion ? ` ${item.direccion}, ${cityName}` : ` ${cityName}`,
+      item.telefono ? ` ${item.telefono}` : null,
+      ` ${getDirectionsUrl(item, cityName)}`
     ].filter(Boolean);
 
     const text = lines.join("\n");
