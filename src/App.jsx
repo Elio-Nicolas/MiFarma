@@ -41,7 +41,8 @@ const TIMEZONE = "America/Argentina/San_Luis";
 // farmacias por grupo.
 const GROUP_CITY_DATA = {
   "villa-mercedes": farmaciasVillaMercedesData,
-  "justo-daract": farmaciasJustoDaractData
+  "justo-daract": farmaciasJustoDaractData,
+  "san-luis-capital": farmaciasSanLuisData
 };
 
 const CITIES = [
@@ -264,7 +265,9 @@ function getGroupShift(cityId, date) {
   if (!data) return null;
 
   const [year, month, day] = date.split("-");
-  const group = data.calendario?.[`${year}-${month}`]?.[String(Number(day))];
+  const group =
+    data.calendario?.[date] ??
+    data.calendario?.[`${year}-${month}`]?.[String(Number(day))];
 
   if (!group) return null;
 
@@ -1376,7 +1379,9 @@ function App() {
   // Marcadores visibles. Villa Mercedes: las de turno y, si hay ubicación, las
   // 3 más cercanas sin turno (desvanecidas). San Luis: todas, como antes.
   const visiblePharmacies = useMemo(() => {
-    if (!GROUP_CITY_DATA[selectedCity]) return mappedPharmacies;
+    if (!GROUP_CITY_DATA[selectedCity] || selectedCity === "san-luis-capital") {
+      return mappedPharmacies;
+    }
 
     const duty = mappedPharmacies.filter((item) => dutyIds.has(item.id));
     if (!userPosition) return duty;
@@ -2111,7 +2116,9 @@ function App() {
                     key={mappedPharmacy.id}
                     position={[mappedPharmacy.lat, mappedPharmacy.lng]}
                     icon={
-                      GROUP_CITY_DATA[selectedCity] && !dutyIds.has(mappedPharmacy.id)
+                      GROUP_CITY_DATA[selectedCity] &&
+                      selectedCity !== "san-luis-capital" &&
+                      !dutyIds.has(mappedPharmacy.id)
                         ? pharmacyIconMuted
                         : pharmacyIcon
                     }
