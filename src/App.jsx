@@ -1660,6 +1660,38 @@ function App() {
     );
   }
 
+  function shareTodayShift() {
+    if (!city || !shift) return;
+
+    const pharmacies = shift.farmacias?.length
+      ? shift.farmacias
+      : shift.farmacia
+        ? [shift.farmacia]
+        : [];
+
+    if (!pharmacies.length) return;
+
+    const permanent = GROUP_CITY_DATA[selectedCity]?.permanentes ?? [];
+    const dateLabel = formatDate(effectiveDate);
+    const lines = [
+      `💊 MiFarma · Farmacias de turno en ${city.name}`,
+      `📅 ${dateLabel}`,
+      shift.grupo ? `Grupo ${shift.grupo}` : null,
+      ...pharmacies.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}${item.telefono ? ` · Tel: ${item.telefono}` : ""}`),
+      shift.horario?.detalle ? `🕒 ${shift.horario.detalle}` : null,
+      permanent.length ? "\nFarmacias permanentes:" : null,
+      ...permanent.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}`),
+      "\nConsultá los turnos actualizados:",
+      "https://farmacias.iored.com.ar/"
+    ].filter(Boolean);
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(lines.join("\\n"))}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
   async function shareFarmacia(item, status) {
     const cityName = city?.name ?? "San Luis";
     const tag =
@@ -1867,6 +1899,19 @@ function App() {
             )}
           </div>
         </section>
+
+        {city && activeTab === "hoy" && shift && (
+          <div className="mx-auto mt-5 max-w-3xl">
+            <button
+              type="button"
+              onClick={shareTodayShift}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-teal-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-teal-200"
+            >
+              <Share2 size={18} />
+              Compartir turno de hoy por WhatsApp
+            </button>
+          </div>
+        )}
 
         {city && activeTab === "hoy" && (
           <section className="mx-auto mt-6 max-w-3xl">
