@@ -1686,7 +1686,7 @@ function App() {
     ].filter(Boolean);
 
     window.open(
-      `https://wa.me/?text=${encodeURIComponent(lines.join("\\n"))}`,
+      `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`,
       "_blank",
       "noopener,noreferrer"
     );
