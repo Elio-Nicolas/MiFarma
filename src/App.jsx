@@ -1415,7 +1415,7 @@ function App() {
   // con ubicación se buscan todas (hacen falta para calcular las más cercanas).
   const locateList = useMemo(() => {
     if (GROUP_CITY_DATA[selectedCity] && !userPosition) {
-      return farmaciasToLocate.filter((item) => dutyIds.has(item.id));
+      return farmaciasToLocate.filter((item) => item.permanente || dutyIds.has(item.id));
     }
     return farmaciasToLocate;
   }, [selectedCity, userPosition, farmaciasToLocate, dutyIds]);
