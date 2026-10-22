@@ -1685,7 +1685,7 @@ function App() {
     ].filter((line) => line !== null && line !== undefined);
 
     window.open(
-      `https://wa.me/?text=${encodeURIComponent(lines.join("\\n"))}`,
+      `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`,
       "_blank",
       "noopener,noreferrer"
     );
@@ -1704,7 +1704,7 @@ function App() {
       item.telefono ? `Tel: ${item.telefono}` : null,
       getDirectionsUrl(item, cityName)
     ].filter(Boolean);
-    const message = lines.join("\\n");
+    const message = lines.join("\n");
 
     window.open(
       `https://wa.me/?text=${encodeURIComponent(message)}`,
