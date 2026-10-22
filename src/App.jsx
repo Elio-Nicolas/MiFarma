@@ -1678,7 +1678,7 @@ function App() {
       ` ${dateLabel}`,
       shift.grupo ? `Grupo ${shift.grupo}` : null,
       ...pharmacies.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}${item.telefono ? ` · Tel: ${item.telefono}` : ""}`),
-      shift.horario?.detalle ? `🕒 ${shift.horario.detalle}` : null,
+      shift.horario?.detalle ? ` ${shift.horario.detalle}` : null,
       permanent.length ? "\nFarmacias permanentes:" : null,
       ...permanent.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}`),
       "\nConsultá los turnos actualizados:",
