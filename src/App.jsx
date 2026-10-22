@@ -1751,7 +1751,7 @@ function App() {
 
             <div>
               <p className="text-sm font-bold tracking-tight text-white">
-                Farmacias <span className="text-teal-200">SL</span>
+                MiFarma <span className="text-teal-200">SL</span>
               </p>
               <p className="mt-0.5 text-[11px] text-slate-400">
                 San Luis, Argentina
@@ -2315,7 +2315,7 @@ function App() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-white">
-                Farmacias <span className="text-teal-200">SL</span>
+                MiFarma <span className="text-teal-200">SL</span>
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 Una forma más simple de encontrar tu farmacia.
