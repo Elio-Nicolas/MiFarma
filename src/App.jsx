@@ -1672,21 +1672,20 @@ function App() {
     if (!pharmacies.length) return;
 
     const permanent = GROUP_CITY_DATA[selectedCity]?.permanentes ?? [];
-    const dateLabel = formatDate(effectiveDate);
     const lines = [
-      ` MiFarma · Farmacias de turno en ${city.name}`,
-      ` ${dateLabel}`,
+      "https://farmacias.iored.com.ar/?share=3",
+      "",
+      `MiFarma - Farmacias de turno en ${city.name}`,
+      formatDate(effectiveDate),
       shift.grupo ? `Grupo ${shift.grupo}` : null,
-      ...pharmacies.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}${item.telefono ? ` · Tel: ${item.telefono}` : ""}`),
-      shift.horario?.detalle ? ` ${shift.horario.detalle}` : null,
-      permanent.length ? "\nFarmacias permanentes:" : null,
-      ...permanent.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}`),
-      "\nConsultá los turnos actualizados:",
-      "https://farmacias.iored.com.ar/"
-    ].filter(Boolean);
+      ...pharmacies.map((item) => `- ${item.nombre}${item.direccion ? ` - ${item.direccion}` : ""}${item.telefono ? ` - Tel: ${item.telefono}` : ""}`),
+      shift.horario?.detalle ?? null,
+      permanent.length ? "Farmacias permanentes:" : null,
+      ...permanent.map((item) => `- ${item.nombre}${item.direccion ? ` - ${item.direccion}` : ""}`)
+    ].filter((line) => line !== null && line !== undefined);
 
     window.open(
-      `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`,
+      `https://wa.me/?text=${encodeURIComponent(lines.join("\\n"))}`,
       "_blank",
       "noopener,noreferrer"
     );
@@ -1694,32 +1693,21 @@ function App() {
 
   async function shareFarmacia(item, status) {
     const cityName = city?.name ?? "San Luis";
-    const tag =
-      status && (status.key === "turno" || status.key === "24h")
-        ? ` (${status.label})`
-        : "";
-
+    const tag = status && (status.key === "turno" || status.key === "24h")
+      ? ` (${status.label})` : "";
+    const url = "https://farmacias.iored.com.ar/?share=3";
     const lines = [
-      `💊 ${item.nombre}${tag}`,
-      item.direccion ? `📍 ${item.direccion}, ${cityName}` : `📍 ${cityName}`,
-      item.telefono ? `📞 ${item.telefono}` : null,
-      `🧭 ${getDirectionsUrl(item, cityName)}`
+      url,
+      "",
+      `MiFarma - ${item.nombre}${tag}`,
+      item.direccion ? `${item.direccion}, ${cityName}` : cityName,
+      item.telefono ? `Tel: ${item.telefono}` : null,
+      getDirectionsUrl(item, cityName)
     ].filter(Boolean);
-
-    const text = lines.join("\n");
-    const url = `${window.location.origin}${window.location.pathname}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: `Farmacia ${item.nombre}`, text, url });
-      } catch {
-        // La persona canceló el menú de compartir.
-      }
-      return;
-    }
+    const message = lines.join("\\n");
 
     window.open(
-      `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
+      `https://wa.me/?text=${encodeURIComponent(message)}`,
       "_blank",
       "noopener,noreferrer"
     );
@@ -2284,7 +2272,7 @@ function App() {
                 </div>
                 <p className="mt-2 max-w-lg text-sm leading-6 text-slate-400">
                   Un espacio para promociones y servicios de farmacias de la
-                  zona..🏗️
+                  zona.
                 </p>
               </div>
             </div>
