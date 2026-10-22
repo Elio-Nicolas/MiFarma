@@ -1674,8 +1674,8 @@ function App() {
     const permanent = GROUP_CITY_DATA[selectedCity]?.permanentes ?? [];
     const dateLabel = formatDate(effectiveDate);
     const lines = [
-      `💊 MiFarma · Farmacias de turno en ${city.name}`,
-      `📅 ${dateLabel}`,
+      ` MiFarma · Farmacias de turno en ${city.name}`,
+      ` ${dateLabel}`,
       shift.grupo ? `Grupo ${shift.grupo}` : null,
       ...pharmacies.map((item) => `• ${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}${item.telefono ? ` · Tel: ${item.telefono}` : ""}`),
       shift.horario?.detalle ? `🕒 ${shift.horario.detalle}` : null,
