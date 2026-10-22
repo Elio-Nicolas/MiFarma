@@ -1673,15 +1673,21 @@ function App() {
 
     const permanent = GROUP_CITY_DATA[selectedCity]?.permanentes ?? [];
     const lines = [
-      "https://farmacias.iored.com.ar/?share=3",
-      "",
-      `MiFarma - Farmacias de turno en ${city.name}`,
+      `Farmacias de turno en ${city.name}`,
       formatDate(effectiveDate),
       shift.grupo ? `Grupo ${shift.grupo}` : null,
-      ...pharmacies.map((item) => `- ${item.nombre}${item.direccion ? ` - ${item.direccion}` : ""}${item.telefono ? ` - Tel: ${item.telefono}` : ""}`),
+      "",
+      ...pharmacies.map((item) =>
+        `${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}${item.telefono ? ` — Tel. ${item.telefono}` : ""}`
+      ),
       shift.horario?.detalle ?? null,
-      permanent.length ? "Farmacias permanentes:" : null,
-      ...permanent.map((item) => `- ${item.nombre}${item.direccion ? ` - ${item.direccion}` : ""}`)
+      permanent.length ? "" : null,
+      permanent.length ? "Farmacias permanentes" : null,
+      ...permanent.map((item) =>
+        `${item.nombre}${item.direccion ? ` — ${item.direccion}` : ""}`
+      ),
+      "",
+      "Más información: https://farmacias.iored.com.ar/?share=3"
     ].filter((line) => line !== null && line !== undefined);
 
     window.open(
@@ -1694,20 +1700,18 @@ function App() {
   async function shareFarmacia(item, status) {
     const cityName = city?.name ?? "San Luis";
     const tag = status && (status.key === "turno" || status.key === "24h")
-      ? ` (${status.label})` : "";
-    const url = "https://farmacias.iored.com.ar/?share=3";
+      ? ` — ${status.label}` : "";
     const lines = [
-      url,
-      "",
-      `MiFarma - ${item.nombre}${tag}`,
+      `${item.nombre}${tag}`,
       item.direccion ? `${item.direccion}, ${cityName}` : cityName,
-      item.telefono ? `Tel: ${item.telefono}` : null,
-      getDirectionsUrl(item, cityName)
-    ].filter(Boolean);
-    const message = lines.join("\n");
+      item.telefono ? `Tel. ${item.telefono}` : null,
+      getDirectionsUrl(item, cityName),
+      "",
+      "Más farmacias y horarios: https://farmacias.iored.com.ar/?share=3"
+    ].filter((line) => line !== null && line !== undefined);
 
     window.open(
-      `https://wa.me/?text=${encodeURIComponent(message)}`,
+      `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`,
       "_blank",
       "noopener,noreferrer"
     );
