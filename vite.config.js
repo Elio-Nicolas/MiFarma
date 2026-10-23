@@ -11,26 +11,15 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "Farmacias de Turno San Luis",
-        short_name: "Farmacias SL",
+        name: "MiFarma | Farmacias de turno",
+        short_name: "MiFarma",
         description:
           "Encontrá farmacias de turno en San Luis y Villa Mercedes.",
         theme_color: "#08111f",
         background_color: "#08111f",
         display: "standalone",
         start_url: "/",
-        icons: [
-          {
-            src: "/icons/pwa-192.png",
-            sizes: "192x192",
-            type: "image/png"
-          },
-          {
-            src: "/icons/pwa-512.png",
-            sizes: "512x512",
-            type: "image/png"
-          }
-        ]
+        icons: [{ src: "/icons/mifarma.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }]
       }
     })
   ]
